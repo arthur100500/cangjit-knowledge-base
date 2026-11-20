@@ -1,11 +1,11 @@
 # Continuation status (2026-11-21)
 
 The saved patch below was committed in cangjit as `9f6ae287`, and the
-continuation was committed locally as `1624147930`; do not reapply
-`jit-worktree.patch`. Pushing `jit_dev` failed: GitHub denied the active SSH
-identity `arthur100500` access to `arthur-alekseev-itmo/cangjit.git`.
-The exact continuation commit is backed up as `jit-continuation.patch` here;
-apply it only on top of `9f6ae287` if the local commit is unavailable.
+continuations were committed locally as `1624147930` and `f332de5f67`; do not
+reapply `jit-worktree.patch`. Pushing `jit_dev` failed: GitHub denied the active
+SSH identity `arthur100500` access to `arthur-alekseev-itmo/cangjit.git`.
+The continuation commits are backed up here as `jit-continuation.patch` and
+`jit-generic-typeinfo.patch`, in that order, for application on `9f6ae287`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -34,20 +34,19 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
   TypeInfo argument, and a native exception through static dispatch all returned
   42. A separately compiled native package and native executable gave the same
   result as JIT execution.
+- Dynamic TypeInfo construction now handles nested `Array<T>`, tuple and closure
+  types using native templates. A native generic `is T` check distinguished
+  `Array<Int64>` from `Array<Bool>`; closure TypeInfo identity also matched.
+  Generic interface and static-interface dispatch matched native exit 42.
 - Object headers are masked to remove runtime state bits before TypeInfo use.
   Pinned allocation size is derived from the runtime TypeInfo, not a constant.
 
 ## Current work and remaining gaps
 
-- Hidden generic TypeInfo frame slots and argument placement build and execute
-  for the exercised generic functions. Generic/instantiated metadata creation
-  and generic virtual introducing types are not yet fully supported.
-  Reproducer: `forward<T>() { value<Array<T>>() }`, called with `Int64`,
-  returns 42 natively but JIT lazy compilation aborts with `unresolved JIT
-  symbol`. Native CodeGen builds dynamic TypeInfo with the template symbol
-  and `CJ_MCC_GetOrCreateTypeInfo(template, count, args)`; see
-  `IRBuilder2::CreateTypeInfo` and `CGType::GetNameOfTypeTemplateGV`. Emitted
-  helper calls must preserve already-placed call operands and obey safepoints.
+- Generic parameters owned by an enclosing class or extension, `This` nested
+  inside type arguments, and concrete generic TypeInfos not yet registered by
+  a native package still need investigation. Native CodeGen maps outer generic
+  parameters through the parent TypeInfo in `CGModule.cpp`.
 - Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface, class and
   static interface paths have been exercised; auto-environment dispatch and
   aggregate ABI remain unverified.

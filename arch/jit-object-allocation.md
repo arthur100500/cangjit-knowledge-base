@@ -69,6 +69,12 @@ the runtime type operands used by virtual calls.
 Generic functions preserve their supplementary TypeInfo arguments in dedicated
 frame slots; callers pass concrete or enclosing generic TypeInfos at the
 native ABI locations. RTTI and virtual-call lowering read those same values.
+Dynamic generic TypeInfos use the native type template and
+`CJ_MCC_GetOrCreateTypeInfo`, including `Closure.tt` for auto-environments.
+Stage supplementary TypeInfos before loading ordinary call operands when
+instantiation can invoke the helper. The native
+`llvm.cj.get.type.info` intrinsic is `nounwind` and `readonly`; its helper is
+not treated as a managed safepoint.
 
 ## Checked arithmetic exceptions
 
