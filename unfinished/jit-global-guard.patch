@@ -1,0 +1,88 @@
+From 5805d63963c56ab343ce10a92d5906bbc026617c Mon Sep 17 00:00:00 2001
+From: Arthur Alekseev <arthur.alekseev.itmo@gmail.com>
+Date: Sat, 21 Nov 2026 02:55:07 +0300
+Subject: [PATCH] Reject unsupported package globals explicitly
+
+---
+ src/JIT/X86_64/Compilers/Context/JitFailures.inc |  1 +
+ src/JIT/X86_64/Utils/MemoryUtils.cpp             | 14 +++++++-------
+ src/JIT/X86_64/X86_64Compiler.cpp                | 10 ++++++++++
+ 3 files changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/src/JIT/X86_64/Compilers/Context/JitFailures.inc b/src/JIT/X86_64/Compilers/Context/JitFailures.inc
+index 818f0071..3ffcafe1 100644
+--- a/src/JIT/X86_64/Compilers/Context/JitFailures.inc
++++ b/src/JIT/X86_64/Compilers/Context/JitFailures.inc
+@@ -38,6 +38,7 @@ JIT_FAILURE(MissingBranchDestination, "missing branch destination")
+ JIT_FAILURE(EpilogueLabelCreationFailed, "failed to create epilogue label")
+ JIT_FAILURE(BlockLabelCreationFailed, "failed to create block label")
+ JIT_FAILURE(UnresolvedLabel, "unresolved code label")
++JIT_FAILURE(UnsupportedPackageGlobal, "package-local global storage is not supported")
+ JIT_FAILURE(UnresolvedSymbol, "unresolved JIT symbol")
+ JIT_FAILURE(UnsupportedCallingConvention, "unsupported calling convention")
+ JIT_FAILURE(UnsupportedCall, "unsupported function call")
+diff --git a/src/JIT/X86_64/Utils/MemoryUtils.cpp b/src/JIT/X86_64/Utils/MemoryUtils.cpp
+index 0665ac28..9f57e0fb 100644
+--- a/src/JIT/X86_64/Utils/MemoryUtils.cpp
++++ b/src/JIT/X86_64/Utils/MemoryUtils.cpp
+@@ -15,7 +15,6 @@
+ #include "../Compilers/Context/FunctionContext.h"
+ #include "../Compilers/Context/GlobalContext.h"
+ #include "../Location.h"
+-#include "cangjie/JIT/JitSymbols.h"
+ #include "cangjie/CHIR/IR/Type/Type.h"
+ #include "cangjie/CHIR/IR/Value/LiteralValue.h"
+ #include "cangjie/CHIR/IR/Value/Value.h"
+@@ -118,21 +117,22 @@ bool MemoryUtils::LoadValue(FunctionContext& context, const CHIR::Value* value,
+         return context.GetError() == asmjit::kErrorOk;
+     }
+     if (value->IsGlobalVar()) {
+-        if (value->IsImportedVar() &&
+-            !context.GetGlobalContext().GetRuntimeBindings()
++        if (!value->IsImportedVar()) {
++            context.Fail(JitFailureKind::UnsupportedPackageGlobal);
++            return false;
++        }
++        if (!context.GetGlobalContext().GetRuntimeBindings()
+                 .EnsureStandardPackage(static_cast<const CHIR::GlobalVar*>(value)->GetPackageName()).empty()) {
+             context.Fail(JitFailureKind::UnresolvedSymbol);
+             return false;
+         }
+-        const auto name = value->IsImportedVar() ? value->GetIdentifierWithoutPrefix() :
+-            JitGlobalSlotName(value->GetIdentifierWithoutPrefix());
+-        auto resolved = context.GetGlobalContext().GetRuntimeBindings().Resolve(name);
++        auto resolved = context.GetGlobalContext().GetRuntimeBindings().Resolve(value->GetIdentifierWithoutPrefix());
+         const auto* symbol = std::get_if<void*>(&resolved);
+         if (!symbol || !*symbol) {
+             context.Fail(JitFailureKind::UnresolvedSymbol);
+             return false;
+         }
+-        const auto address = value->IsImportedVar() ? *symbol : *static_cast<void* const*>(*symbol);
++        const auto address = *symbol;
+         if (!address) {
+             context.Fail(JitFailureKind::UnresolvedSymbol);
+             return false;
+diff --git a/src/JIT/X86_64/X86_64Compiler.cpp b/src/JIT/X86_64/X86_64Compiler.cpp
+index b4233458..c923ca47 100644
+--- a/src/JIT/X86_64/X86_64Compiler.cpp
++++ b/src/JIT/X86_64/X86_64Compiler.cpp
+@@ -38,6 +38,16 @@ void X86_64Compiler::Compile(const CHIR::Package& package, std::ostream& output)
+             output.setstate(std::ios::badbit);
+             return;
+         }
++        // The native entry runs package initializers before user.main. Do not
++        // silently skip source-level initialization with observable effects.
++        for (const auto* global : package.GetGlobalVars()) {
++            if (global && !global->IsImportedVar() && !global->TestAttr(CHIR::Attribute::COMPILER_ADD) &&
++                global->GetInitFunc()) {
++                std::cerr << "JIT: package-local global initialization is not supported\n";
++                output.setstate(std::ios::badbit);
++                return;
++            }
++        }
+         if (!runtimeConfigured) {
+             const char* home = std::getenv("CANGJIE_HOME");
+             if (!home || !*home) {
+-- 
+2.55.0
+

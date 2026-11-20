@@ -2,12 +2,13 @@
 
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
 commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`,
-`69cb8dff22`, `ebe49b5649`, and `292122b613`. Pushing `jit_dev` failed:
-GitHub denied SSH identity `arthur100500` access to
+`69cb8dff22`, `ebe49b5649`, `292122b613`, and `5805d63963`. Pushing `jit_dev`
+failed: GitHub denied SSH identity `arthur100500` access to
 `arthur-alekseev-itmo/cangjit.git`. Apply the backups on `9f6ae287` in order:
 `jit-continuation.patch`, `jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
 `jit-concrete-typeinfo.patch`, `jit-generic-allocation.patch`,
-`jit-generic-instanceof.patch`, and `jit-any-instanceof.patch`.
+`jit-generic-instanceof.patch`, `jit-any-instanceof.patch`, and
+`jit-global-guard.patch`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -62,15 +63,18 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 
 ## Current work and remaining gaps
 
-- `This` nested inside type arguments still needs investigation.
+- Nested `This` in source type arguments is rejected by the language; whether
+  generated CHIR can contain that case remains unverified.
 - Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface, class and
   static interface paths have been exercised; auto-environment dispatch and
   aggregate ABI remain unverified.
 - JIT-defined package TypeInfo and package-local global storage/initialization
-  are still unavailable. `var answer: Int64 = 42; main() { answer }` returns
-  42 natively but JIT fails on the unresolved global slot. Native entry calls
-  the package initializer before `user.main`; package preinitialization needs
-  loader metadata and managed global references need GC static roots.
+  are still unavailable. References to package-local globals now fail with an
+  explicit diagnostic rather than attempting to resolve obsolete sidecar slots.
+  Source globals with nonliteral initializer functions are rejected before main
+  instead of silently skipping side effects. Native entry runs the package
+  initializer first; preinitialization needs loader metadata and managed global
+  references need GC static roots.
 - Local finalizers and arbitrary external package discovery remain unresolved.
   Do not replace these with fake metadata.
 - The object-layout, exception-message, package-loading and dispatch
