@@ -1,0 +1,35 @@
+ M src/JIT/CMakeLists.txt
+ M src/JIT/X86_64/Compilers/Context/FunctionContext.cpp
+ M src/JIT/X86_64/Compilers/Context/FunctionContext.h
+ M src/JIT/X86_64/Compilers/Context/GlobalContext.h
+ M src/JIT/X86_64/Compilers/Expression/CompileApply.cpp
+ M src/JIT/X86_64/Compilers/Expression/CompileApply.h
+ M src/JIT/X86_64/Compilers/Expression/CompileBinaryExpression.cpp
+ M src/JIT/X86_64/Compilers/Expression/CompileBinaryExpression.h
+ M src/JIT/X86_64/Compilers/Expression/CompileNumericCast.cpp
+ M src/JIT/X86_64/Compilers/Expression/CompileNumericCast.h
+ M src/JIT/X86_64/Compilers/Expression/CompileUnaryExpression.cpp
+ M src/JIT/X86_64/Compilers/Expression/CompileUnaryExpression.h
+ M src/JIT/X86_64/Compilers/Function/CompileBlock.cpp
+ M src/JIT/X86_64/Compilers/Function/CompileFunction.cpp
+ M src/JIT/X86_64/Compilers/Function/CompileFunctionStub.cpp
+ M src/JIT/X86_64/Types.h
+ M src/JIT/X86_64/Utils/MemoryUtils.cpp
+ M src/JIT/X86_64/Utils/MemoryUtils.h
+ M src/JIT/X86_64/Utils/RegisterUtils.cpp
+ M src/JIT/X86_64/Utils/RegisterUtils.h
+ M src/JIT/X86_64/Utils/StackFrameUtils.cpp
+ M src/JIT/X86_64/Utils/SystemVCallingConvention.cpp
+ M src/JIT/X86_64/Utils/SystemVCallingConvention.h
+ M src/JIT/X86_64/X86_64Compiler.cpp
+ M src/JIT/X86_64/X86_64Compiler.h
+?? include/cangjie/JIT/
+?? src/JIT/X86_64/Compilers/Expression/CompileObject.cpp
+?? src/JIT/X86_64/Compilers/Expression/CompileObject.h
+?? src/JIT/X86_64/JitMetadataBuilder.cpp
+?? src/JIT/X86_64/JitMetadataBuilder.h
+?? src/JIT/X86_64/JitRuntimeBindings.cpp
+?? src/JIT/X86_64/JitRuntimeBindings.h
+?? src/JIT/X86_64/RegisterAllocation/LocalFinalizerFrontier.h
+?? src/JIT/X86_64/RegisterAllocation/SafepointLiveness.cpp
+?? src/JIT/X86_64/RegisterAllocation/SafepointLiveness.h
