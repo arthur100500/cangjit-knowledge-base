@@ -1,3 +1,57 @@
+# Continuation status (2026-11-21)
+
+The saved patch below was already committed in cangjit as `9f6ae287`. Further
+work is currently **uncommitted in the cangjit worktree**; do not reapply
+`jit-worktree.patch`. Code changes are confined to `src/JIT/**`. The
+knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
+`AGENTS.md` links to it.
+
+## Completed and exercised
+
+- Removed the unused sidecar requirement; managed startup runs `main`.
+- Class allocation, typed catches, cross-frame unwinding and `finally` execute.
+  Tests returned 42 for direct and cross-frame catches, 7 for a derived
+  exception caught by its base, and 10 for nested cleanup and rethrow.
+- Checked arithmetic creates the native factory's exact message and throws the
+  returned exception. Normal addition, overflow, division by zero, overshift,
+  narrowing casts and same-frame unwinding were exercised. GDB observed the
+  factory inputs `add` and `The result would be greater than Int8.Max.`.
+- Unit-returning calls and their lazy stubs work with `cjStackGrow=1`; forcing
+  `cjStackGrow=0` aborts while loading this SDK's incompatible std.core.
+- On-demand standard-package loading runs `Mutex()` and imported methods.
+  Package-load failure recovery and repeated loading were exercised.
+- Override ABI classification follows `OverrideSrcFuncType`. Scalar Boolean
+  and narrow integer call results are normalized; `tryLock()`, a local Bool
+  function, and an Int8-returning function were exercised.
+- Virtual instance dispatch through interfaces and classes works for the
+  exercised native types; a native exception propagates through `TryInvoke`.
+  GDB confirmed the class vtable branch. A receiver survived explicit heavy GC.
+- Object headers are masked to remove runtime state bits before TypeInfo use.
+  Pinned allocation size is derived from the runtime TypeInfo, not a constant.
+
+## Current work and remaining gaps
+
+- The latest compiler build passed after adding hidden generic TypeInfo frame
+  slots and argument placement. **This latest change has not yet been run.**
+  Next, compile a real native test package defining a static interface method,
+  then exercise generic `InvokeStatic` from JIT code. Check normal and
+  exceptional calls, forwarded generic type arguments, and stack arguments.
+- Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface and class
+  paths have been executed; static virtual dispatch, auto-environment dispatch,
+  aggregate ABI, and generic/instantiated metadata are not yet fully verified.
+- JIT-defined package TypeInfo and package-local global storage/initialization
+  are still unavailable. Local finalizers and arbitrary external package
+  discovery remain unresolved. Do not replace these with fake metadata.
+- The object-layout, exception-message, package-loading and dispatch
+  decisions are in `arch/jit-object-allocation.md`.
+- Build from the parent project root with `./cjb.sh cjc` in the Nix shell.
+  `cjb.sh` deletes `logs/`; back up existing logs first. Original logs from
+  this continuation were saved at `/tmp/cangjit-logs.Ow9qSo/logs`.
+
+The following section is the **historical** handoff from the previous machine;
+its status claims and proposed no-message overflow helpers are superseded by
+the continuation above.
+
 # Cangjie JIT Exception Handling — Session State (2026-11-20)
 
 Continuation point for another PC. Read AGENTS.md in repo root for change-pipeline
