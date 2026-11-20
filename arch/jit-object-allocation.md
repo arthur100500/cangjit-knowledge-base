@@ -26,11 +26,11 @@ arbitrary external package discovery remain separate concerns.
 
 ## Catch type checks
 
-Lower `InstanceOf` for class references by resolving the target type in loaded
-runtime metadata, obtaining the object's runtime type, and calling
-`CJ_MCC_IsSubType`. Store the Boolean result. Reject unresolved types and
-non-class operands: generic and tuple tests require different native semantics.
-This enables catch type dispatch without inventing metadata for JIT-defined types.
+Lower `InstanceOf` for class references by obtaining the target TypeInfo,
+including dynamic generic class instantiations, and the object's runtime type,
+then calling `CJ_MCC_IsSubType`. Store the Boolean result. Reject unresolved
+types and non-class operands; generic values and tuple tests require different
+native semantics. Do not invent metadata for JIT-defined types.
 
 ## Native calls for object construction
 

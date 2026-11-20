@@ -1,12 +1,13 @@
 # Continuation status (2026-11-21)
 
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
-commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`, and
-`69cb8dff22`. Pushing `jit_dev` failed: GitHub denied SSH identity
-`arthur100500` access to `arthur-alekseev-itmo/cangjit.git`. Apply the backups
-on `9f6ae287` in order: `jit-continuation.patch`, `jit-generic-typeinfo.patch`,
-`jit-outer-typeinfo.patch`, `jit-concrete-typeinfo.patch`, and
-`jit-generic-allocation.patch`.
+commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`,
+`69cb8dff22`, and `ebe49b5649`. Pushing `jit_dev` failed: GitHub denied SSH
+identity `arthur100500` access to `arthur-alekseev-itmo/cangjit.git`. Apply
+the backups on `9f6ae287` in order: `jit-continuation.patch`,
+`jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
+`jit-concrete-typeinfo.patch`, `jit-generic-allocation.patch`, and
+`jit-generic-instanceof.patch`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -45,6 +46,8 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 - Concrete generic TypeInfos absent from the runtime registry are materialized
   from their templates. An initially unseen `C<Bool>` was accepted by a native
   `is T` check after a native generic factory created the matching object.
+- Generic class `is` checks resolve their target TypeInfo at runtime. A native
+  and JIT comparison both distinguished `C<Int64>` from `C<Bool>`.
 - Concrete and dynamic generic class allocation derive size from runtime
   TypeInfo. Objects with `?T` fields survived explicit heavy GC for `Bool` and
   `(Int64, Int64)` instantiations; native and JIT results were 42.
