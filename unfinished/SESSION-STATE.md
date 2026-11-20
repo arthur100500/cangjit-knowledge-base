@@ -1,11 +1,11 @@
 # Continuation status (2026-11-21)
 
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
-commits are `1624147930`, `f332de5f67`, and `1e59a2ece6`. Pushing `jit_dev`
-failed: GitHub denied SSH identity `arthur100500` access to
-`arthur-alekseev-itmo/cangjit.git`. The continuation commits are backed up as
-`jit-continuation.patch`, `jit-generic-typeinfo.patch`, and
-`jit-outer-typeinfo.patch`, in that order, for application on `9f6ae287`.
+commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, and `a6374a8bd1`.
+Pushing `jit_dev` failed: GitHub denied SSH identity `arthur100500` access to
+`arthur-alekseev-itmo/cangjit.git`. Apply the backups on `9f6ae287` in order:
+`jit-continuation.patch`, `jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
+and `jit-concrete-typeinfo.patch`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -41,13 +41,15 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 - Generic extension methods now recover outer type parameters through the
   runtime TypeInfo argument path. An extension of `C<Array<T>>` correctly
   distinguished `T = Int64` and `T = Bool` via a native `is T` check.
+- Concrete generic TypeInfos absent from the runtime registry are materialized
+  from their templates. An initially unseen `C<Bool>` was accepted by a native
+  `is T` check after a native generic factory created the matching object.
 - Object headers are masked to remove runtime state bits before TypeInfo use.
   Pinned allocation size is derived from the runtime TypeInfo, not a constant.
 
 ## Current work and remaining gaps
 
-- `This` nested inside type arguments and concrete generic TypeInfos not yet
-  registered by a native package still need investigation.
+- `This` nested inside type arguments still needs investigation.
 - Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface, class and
   static interface paths have been exercised; auto-environment dispatch and
   aggregate ABI remain unverified.
