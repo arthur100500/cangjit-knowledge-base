@@ -38,6 +38,12 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 - Hidden generic TypeInfo frame slots and argument placement build and execute
   for the exercised generic functions. Generic/instantiated metadata creation
   and generic virtual introducing types are not yet fully supported.
+  Reproducer: `forward<T>() { value<Array<T>>() }`, called with `Int64`,
+  returns 42 natively but JIT lazy compilation aborts with `unresolved JIT
+  symbol`. Native CodeGen builds dynamic TypeInfo with the template symbol
+  and `CJ_MCC_GetOrCreateTypeInfo(template, count, args)`; see
+  `IRBuilder2::CreateTypeInfo` and `CGType::GetNameOfTypeTemplateGV`. Emitted
+  helper calls must preserve already-placed call operands and obey safepoints.
 - Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface, class and
   static interface paths have been exercised; auto-environment dispatch and
   aggregate ABI remain unverified.
