@@ -1,8 +1,12 @@
 # Continuation status (2026-11-21)
 
-The saved patch below was already committed in cangjit as `9f6ae287`. Further
-work is currently **uncommitted in the cangjit worktree**; do not reapply
-`jit-worktree.patch`. Code changes are confined to `src/JIT/**`. The
+The saved patch below was committed in cangjit as `9f6ae287`, and the
+continuation was committed locally as `1624147930`; do not reapply
+`jit-worktree.patch`. Pushing `jit_dev` failed: GitHub denied the active SSH
+identity `arthur100500` access to `arthur-alekseev-itmo/cangjit.git`.
+The exact continuation commit is backed up as `jit-continuation.patch` here;
+apply it only on top of `9f6ae287` if the local commit is unavailable.
+Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
 
