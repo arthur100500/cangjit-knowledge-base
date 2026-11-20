@@ -1,11 +1,11 @@
 # Continuation status (2026-11-21)
 
-The saved patch below was committed in cangjit as `9f6ae287`, and the
-continuations were committed locally as `1624147930` and `f332de5f67`; do not
-reapply `jit-worktree.patch`. Pushing `jit_dev` failed: GitHub denied the active
-SSH identity `arthur100500` access to `arthur-alekseev-itmo/cangjit.git`.
-The continuation commits are backed up here as `jit-continuation.patch` and
-`jit-generic-typeinfo.patch`, in that order, for application on `9f6ae287`.
+The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
+commits are `1624147930`, `f332de5f67`, and `1e59a2ece6`. Pushing `jit_dev`
+failed: GitHub denied SSH identity `arthur100500` access to
+`arthur-alekseev-itmo/cangjit.git`. The continuation commits are backed up as
+`jit-continuation.patch`, `jit-generic-typeinfo.patch`, and
+`jit-outer-typeinfo.patch`, in that order, for application on `9f6ae287`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -38,15 +38,16 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
   types using native templates. A native generic `is T` check distinguished
   `Array<Int64>` from `Array<Bool>`; closure TypeInfo identity also matched.
   Generic interface and static-interface dispatch matched native exit 42.
+- Generic extension methods now recover outer type parameters through the
+  runtime TypeInfo argument path. An extension of `C<Array<T>>` correctly
+  distinguished `T = Int64` and `T = Bool` via a native `is T` check.
 - Object headers are masked to remove runtime state bits before TypeInfo use.
   Pinned allocation size is derived from the runtime TypeInfo, not a constant.
 
 ## Current work and remaining gaps
 
-- Generic parameters owned by an enclosing class or extension, `This` nested
-  inside type arguments, and concrete generic TypeInfos not yet registered by
-  a native package still need investigation. Native CodeGen maps outer generic
-  parameters through the parent TypeInfo in `CGModule.cpp`.
+- `This` nested inside type arguments and concrete generic TypeInfos not yet
+  registered by a native package still need investigation.
 - Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface, class and
   static interface paths have been exercised; auto-environment dispatch and
   aggregate ABI remain unverified.

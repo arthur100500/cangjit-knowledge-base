@@ -75,6 +75,9 @@ Stage supplementary TypeInfos before loading ordinary call operands when
 instantiation can invoke the helper. The native
 `llvm.cj.get.type.info` intrinsic is `nounwind` and `readonly`; its helper is
 not treated as a managed safepoint.
+Generic class and extension methods also recover enclosing parameters from
+the outer TypeInfo's `typeArgs`, following the extended type's nested argument
+path as native CodeGen does. On x86-64 that field is at byte offset 48.
 
 ## Checked arithmetic exceptions
 
