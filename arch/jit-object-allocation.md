@@ -28,9 +28,10 @@ arbitrary external package discovery remain separate concerns.
 
 Lower `InstanceOf` for class references by obtaining the target TypeInfo,
 including dynamic generic class instantiations, and the object's runtime type,
-then calling `CJ_MCC_IsSubType`. Store the Boolean result. Reject unresolved
-types and non-class operands; generic values and tuple tests require different
-native semantics. Do not invent metadata for JIT-defined types.
+then calling `CJ_MCC_IsSubType`. An `Any` receiver may contain a boxed tuple;
+check the runtime TypeInfo kind and use `CJ_MCC_IsTupleTypeOf` for that case,
+as native CodeGen does. Generic target TypeInfos are supported. Unboxed tuples
+and other non-reference operands still require their native representations.
 
 ## Native calls for object construction
 
