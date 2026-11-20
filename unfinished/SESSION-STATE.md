@@ -26,19 +26,21 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 - Virtual instance dispatch through interfaces and classes works for the
   exercised native types; a native exception propagates through `TryInvoke`.
   GDB confirmed the class vtable branch. A receiver survived explicit heavy GC.
+- Static interface dispatch, generic TypeInfo forwarding, a stack-passed
+  TypeInfo argument, and a native exception through static dispatch all returned
+  42. A separately compiled native package and native executable gave the same
+  result as JIT execution.
 - Object headers are masked to remove runtime state bits before TypeInfo use.
   Pinned allocation size is derived from the runtime TypeInfo, not a constant.
 
 ## Current work and remaining gaps
 
-- The latest compiler build passed after adding hidden generic TypeInfo frame
-  slots and argument placement. **This latest change has not yet been run.**
-  Next, compile a real native test package defining a static interface method,
-  then exercise generic `InvokeStatic` from JIT code. Check normal and
-  exceptional calls, forwarded generic type arguments, and stack arguments.
-- Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface and class
-  paths have been executed; static virtual dispatch, auto-environment dispatch,
-  aggregate ABI, and generic/instantiated metadata are not yet fully verified.
+- Hidden generic TypeInfo frame slots and argument placement build and execute
+  for the exercised generic functions. Generic/instantiated metadata creation
+  and generic virtual introducing types are not yet fully supported.
+- Virtual dispatch code is in `CompileInvoke.{h,cpp}`. Interface, class and
+  static interface paths have been exercised; auto-environment dispatch and
+  aggregate ABI remain unverified.
 - JIT-defined package TypeInfo and package-local global storage/initialization
   are still unavailable. Local finalizers and arbitrary external package
   discovery remain unresolved. Do not replace these with fake metadata.
