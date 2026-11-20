@@ -1,11 +1,12 @@
 # Continuation status (2026-11-21)
 
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
-commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, and `a6374a8bd1`.
-Pushing `jit_dev` failed: GitHub denied SSH identity `arthur100500` access to
-`arthur-alekseev-itmo/cangjit.git`. Apply the backups on `9f6ae287` in order:
-`jit-continuation.patch`, `jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
-and `jit-concrete-typeinfo.patch`.
+commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`, and
+`69cb8dff22`. Pushing `jit_dev` failed: GitHub denied SSH identity
+`arthur100500` access to `arthur-alekseev-itmo/cangjit.git`. Apply the backups
+on `9f6ae287` in order: `jit-continuation.patch`, `jit-generic-typeinfo.patch`,
+`jit-outer-typeinfo.patch`, `jit-concrete-typeinfo.patch`, and
+`jit-generic-allocation.patch`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -44,6 +45,13 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 - Concrete generic TypeInfos absent from the runtime registry are materialized
   from their templates. An initially unseen `C<Bool>` was accepted by a native
   `is T` check after a native generic factory created the matching object.
+- Concrete and dynamic generic class allocation derive size from runtime
+  TypeInfo. Objects with `?T` fields survived explicit heavy GC for `Bool` and
+  `(Int64, Int64)` instantiations; native and JIT results were 42.
+- A shutdown-time GC crash was observed in `TypeInfo::IsArrayType`. [INFERENCE]
+  unloading libraries before stopping the collector could invalidate TypeInfos.
+  Owned-runtime shutdown now finishes the runtime first; the heavy-GC fixture
+  passed 10/10 shutdowns afterward.
 - Object headers are masked to remove runtime state bits before TypeInfo use.
   Pinned allocation size is derived from the runtime TypeInfo, not a constant.
 
@@ -54,8 +62,12 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
   static interface paths have been exercised; auto-environment dispatch and
   aggregate ABI remain unverified.
 - JIT-defined package TypeInfo and package-local global storage/initialization
-  are still unavailable. Local finalizers and arbitrary external package
-  discovery remain unresolved. Do not replace these with fake metadata.
+  are still unavailable. `var answer: Int64 = 42; main() { answer }` returns
+  42 natively but JIT fails on the unresolved global slot. Native entry calls
+  the package initializer before `user.main`; package preinitialization needs
+  loader metadata and managed global references need GC static roots.
+- Local finalizers and arbitrary external package discovery remain unresolved.
+  Do not replace these with fake metadata.
 - The object-layout, exception-message, package-loading and dispatch
   decisions are in `arch/jit-object-allocation.md`.
 - Build from the parent project root with `./cjb.sh cjc` in the Nix shell.

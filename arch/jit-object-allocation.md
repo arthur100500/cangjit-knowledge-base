@@ -81,6 +81,14 @@ path as native CodeGen does. On x86-64 that field is at byte offset 48.
 For a concrete generic TypeInfo missing from the runtime registry, resolve its
 template and recursively materialize its concrete arguments during JIT
 compilation; the runtime canonicalizes the resulting TypeInfo.
+Class allocation uses the same concrete TypeInfo resolver. For a dynamic
+generic class, resolve its TypeInfo at runtime and derive the aligned payload
+size from it before calling the normal allocation helper.
+
+For an owned runtime, stop the runtime and its collector before unloading
+native libraries: unreachable heap objects may still reference their TypeInfos.
+Borrowed-runtime callers must quiesce GC and ensure no heap object references
+those libraries before shutdown.
 
 ## Checked arithmetic exceptions
 

@@ -1,0 +1,200 @@
+From 69cb8dff22036a7f5c2ade01323a81f798e97233 Mon Sep 17 00:00:00 2001
+From: Arthur Alekseev <arthur.alekseev.itmo@gmail.com>
+Date: Sat, 21 Nov 2026 02:40:20 +0300
+Subject: [PATCH] Allocate generic classes and preserve TypeInfos during
+ shutdown
+
+---
+ .../Compilers/Context/FunctionContext.cpp     |  7 ++-
+ .../Compilers/Context/FunctionContext.h       |  1 +
+ .../Compilers/Expression/CompileObject.cpp    | 48 +++++++++++++------
+ src/JIT/X86_64/JitRuntimeBindings.cpp         | 18 +++----
+ src/JIT/X86_64/JitRuntimeBindings.h           |  5 +-
+ 5 files changed, 54 insertions(+), 25 deletions(-)
+
+diff --git a/src/JIT/X86_64/Compilers/Context/FunctionContext.cpp b/src/JIT/X86_64/Compilers/Context/FunctionContext.cpp
+index af3d1e28..27ca6667 100644
+--- a/src/JIT/X86_64/Compilers/Context/FunctionContext.cpp
++++ b/src/JIT/X86_64/Compilers/Context/FunctionContext.cpp
+@@ -241,6 +241,11 @@ std::optional<int32_t> FunctionContext::GetHiddenTypeInfoOffset(size_t index) co
+     return StackFrameUtils::GetSlotOffset(hiddenTypeInfoBase + index, registerAllocation.GetStackSlotCount());
+ }
+ 
++void* FunctionContext::GetConcreteTypeInfo(const CHIR::Type& type)
++{
++    return ResolveConcreteTypeInfo(*this, type);
++}
++
+ bool FunctionContext::LoadTypeInfo(const CHIR::Type& input, const asmjit::x86::Gp& target)
+ {
+     const CHIR::Type* type = &input;
+@@ -360,7 +365,7 @@ bool FunctionContext::LoadTypeInfo(const CHIR::Type& input, const asmjit::x86::G
+         }
+         return true;
+     }
+-    auto* info = ResolveConcreteTypeInfo(*this, *type);
++    auto* info = GetConcreteTypeInfo(*type);
+     if (!info) {
+         Fail(JitFailureKind::UnresolvedSymbol);
+         return false;
+diff --git a/src/JIT/X86_64/Compilers/Context/FunctionContext.h b/src/JIT/X86_64/Compilers/Context/FunctionContext.h
+index 705fb8e8..93dfd948 100644
+--- a/src/JIT/X86_64/Compilers/Context/FunctionContext.h
++++ b/src/JIT/X86_64/Compilers/Context/FunctionContext.h
+@@ -41,6 +41,7 @@ public:
+     asmjit::x86::Assembler& GetAssembler() noexcept;
+     JitMetadataBuilder& GetMetadataBuilder() noexcept;
+     std::optional<int32_t> GetHiddenTypeInfoOffset(size_t index) const noexcept;
++    void* GetConcreteTypeInfo(const CHIR::Type& type);
+     bool LoadTypeInfo(const CHIR::Type& type, const asmjit::x86::Gp& target);
+     bool RecordSafepoint(const CHIR::Expression& expression, const CHIR::Value* temporaryRoot = nullptr);
+     bool EmitExceptionLanding(const CHIR::Block& block, size_t callStart, size_t callEnd);
+diff --git a/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp b/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp
+index e54442f4..431d2f17 100644
+--- a/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp
++++ b/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp
+@@ -17,7 +17,6 @@
+ #include "../../Utils/MemoryUtils.h"
+ #include "cangjie/CHIR/IR/Type/ClassDef.h"
+ #include "cangjie/CHIR/IR/Value/Value.h"
+-#include "cangjie/Mangle/CHIRTypeManglingUtils.h"
+ #include "cangjie/Utils/ConstantsUtils.h"
+ 
+ namespace Cangjie::JIT::X86_64 {
+@@ -82,23 +81,18 @@ void CompileAllocation(FunctionContext& context, const CHIR::AllocateBase& expre
+         return;
+     }
+ 
+-    auto* lookupAddress = Resolve(context, "CJ_MCC_GetTypeByMangledName");
++    const bool dynamic = type->IsGenericRelated();
++    auto* typeInfo = dynamic ? nullptr : context.GetConcreteTypeInfo(*type);
+     auto* sizeAddress = Resolve(context, "_ZNK12MapleRuntime8TypeInfo15GetInstanceSizeEv");
+     const std::string_view allocationSymbol = AllocationSymbol(*def, local);
+     auto* allocateAddress = Resolve(context, allocationSymbol.data());
+-    if (!lookupAddress || !sizeAddress || !allocateAddress) {
+-        return;
+-    }
+-    using Lookup = void* (*)(const char*);
+-    using GetSize = uint32_t (*)(const void*);
+-    const auto name = CHIR::GetTypeQualifiedName(*type, true);
+-    auto* typeInfo = reinterpret_cast<Lookup>(lookupAddress)(name.c_str());
+-    if (!typeInfo) {
++    if ((!dynamic && !typeInfo) || !sizeAddress || !allocateAddress) {
+         context.Fail(JitFailureKind::UnresolvedSymbol, expression.GetExprKind());
+         return;
+     }
++    using GetSize = uint32_t (*)(const void*);
+     // Runtime expects the eight-byte header plus the payload rounded to eight bytes.
+-    const uint64_t payload = reinterpret_cast<GetSize>(sizeAddress)(typeInfo);
++    const uint64_t payload = dynamic ? 0 : reinterpret_cast<GetSize>(sizeAddress)(typeInfo);
+     const bool pinned = allocationSymbol == "CJ_MCC_NewPinnedObject";
+     const uint64_t size = ((payload + 7) & ~uint64_t{7}) + 8;
+     if (size > std::numeric_limits<uint32_t>::max()) {
+@@ -107,6 +101,10 @@ void CompileAllocation(FunctionContext& context, const CHIR::AllocateBase& expre
+     }
+     std::vector<CodeAddress> methods;
+     if (type->IsAutoEnv()) {
++        if (dynamic) {
++            context.Fail(JitFailureKind::UnsupportedAllocation, expression.GetExprKind());
++            return;
++        }
+         const auto functions = def->GetMethods();
+         if (functions.size() > payload / sizeof(uint64_t) ||
+             functions.size() > (std::numeric_limits<int32_t>::max() - 8) / sizeof(uint64_t)) {
+@@ -125,8 +123,24 @@ void CompileAllocation(FunctionContext& context, const CHIR::AllocateBase& expre
+     }
+ 
+     auto& assembler = context.GetAssembler();
+-    assembler.mov(x86::rdi, asmjit::imm(reinterpret_cast<uintptr_t>(typeInfo)));
+-    assembler.mov(x86::esi, static_cast<uint32_t>(size));
++    if (dynamic) {
++        if (!context.LoadTypeInfo(*type, x86::rax)) {
++            return;
++        }
++        MemoryUtils::ReserveStack(context, 16);
++        assembler.mov(x86::qword_ptr(x86::rsp), x86::rax);
++        assembler.mov(x86::rdi, x86::rax);
++        assembler.long_().mov(x86::r11, asmjit::imm(reinterpret_cast<uintptr_t>(sizeAddress)));
++        assembler.call(x86::r11);
++        assembler.mov(x86::esi, x86::eax);
++        assembler.add(x86::rsi, 7);
++        assembler.and_(x86::rsi, -8);
++        assembler.add(x86::rsi, 8);
++        assembler.mov(x86::rdi, x86::qword_ptr(x86::rsp));
++    } else {
++        assembler.mov(x86::rdi, asmjit::imm(reinterpret_cast<uintptr_t>(typeInfo)));
++        assembler.mov(x86::esi, static_cast<uint32_t>(size));
++    }
+     if (pinned) {
+         assembler.xor_(x86::edx, x86::edx);
+     }
+@@ -134,7 +148,13 @@ void CompileAllocation(FunctionContext& context, const CHIR::AllocateBase& expre
+     const auto callStart = assembler.offset();
+     assembler.call(x86::r11);
+     const auto callEnd = assembler.offset();
+-    if (!context.RecordSafepoint(expression) || !MemoryUtils::StoreValue(context, result, x86::rax)) {
++    if (!context.RecordSafepoint(expression)) {
++        return;
++    }
++    if (dynamic) {
++        MemoryUtils::ReleaseStack(context, 16);
++    }
++    if (!MemoryUtils::StoreValue(context, result, x86::rax)) {
+         return;
+     }
+     for (size_t i = 0; i < methods.size(); ++i) {
+diff --git a/src/JIT/X86_64/JitRuntimeBindings.cpp b/src/JIT/X86_64/JitRuntimeBindings.cpp
+index b3267cab..1fed3cba 100644
+--- a/src/JIT/X86_64/JitRuntimeBindings.cpp
++++ b/src/JIT/X86_64/JitRuntimeBindings.cpp
+@@ -163,14 +163,6 @@ void JitRuntimeBindings::Shutdown()
+         return;
+     }
+     initialized = false;
+-    auto unload = symbols.find("UnloadCJLibrary");
+-    while (!libraries.empty()) {
+-        if (unload == symbols.end() || reinterpret_cast<LibraryOperation>(unload->second)(libraries.back().c_str()) != 0) {
+-            std::fprintf(stderr, "JIT runtime bindings: failed to unload %s\n", libraries.back().c_str());
+-            return; // Retain the runtime and remaining handles rather than invalidate live code.
+-        }
+-        libraries.pop_back();
+-    }
+     if (ownsRuntime) {
+         auto fini = symbols.find("FiniCJRuntime");
+         if (fini == symbols.end() || reinterpret_cast<FiniRuntime>(fini->second)() != 0) {
+@@ -179,6 +171,16 @@ void JitRuntimeBindings::Shutdown()
+         }
+         ownsRuntime = false;
+     }
++    // Keep library TypeInfos mapped until the owned runtime has stopped its
++    // collector. Unreachable objects can still be visited during shutdown.
++    auto unload = symbols.find("UnloadCJLibrary");
++    while (!libraries.empty()) {
++        if (unload == symbols.end() || reinterpret_cast<LibraryOperation>(unload->second)(libraries.back().c_str()) != 0) {
++            std::fprintf(stderr, "JIT runtime bindings: failed to unload %s\n", libraries.back().c_str());
++            return; // Retain the runtime and remaining handles rather than invalidate live code.
++        }
++        libraries.pop_back();
++    }
+     symbols.clear();
+     if (dlclose(runtime) == 0) {
+         runtime = nullptr;
+diff --git a/src/JIT/X86_64/JitRuntimeBindings.h b/src/JIT/X86_64/JitRuntimeBindings.h
+index be60cbfd..7d730232 100644
+--- a/src/JIT/X86_64/JitRuntimeBindings.h
++++ b/src/JIT/X86_64/JitRuntimeBindings.h
+@@ -35,8 +35,9 @@ public:
+     BindingResult Initialize(const RuntimeConfig& config);
+     BindingResult EnsureStandardPackage(std::string_view package);
+     SymbolResult Resolve(SymbolName name);
+-    // The host must first quiesce generated code and release all objects and
+-    // tasks referencing the loaded libraries. Calls are externally serialized.
++    // The host must first quiesce generated code and tasks. For a borrowed
++    // runtime it must also ensure no heap objects or GC work can reference
++    // the loaded libraries. Calls are externally serialized.
+     void Shutdown();
+ 
+ private:
+-- 
+2.55.0
+
