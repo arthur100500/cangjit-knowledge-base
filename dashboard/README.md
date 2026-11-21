@@ -9,7 +9,7 @@ node dashboard/server.js
 
 Open <http://localhost:3000/> on the host, or open `http://<host-LAN-IP>:3000/` on a phone connected to the same network. To choose another port, start the server with `PORT=4000 node dashboard/server.js` and use that port in the URL. Stop it with Ctrl+C. Task records in `tasks.json`, class data in `classes/classes.json`, and the designated Markdown documents are read from disk on requests; reload the page to see changes.
 
-The Architecture section visualizes the documented classes with Cytoscape.js, served locally from the installed dependency rather than a CDN. Arrows point from the class declaring a relationship to its target; edge labels describe the relationship. Pan and zoom the graph, or use the class list to open descriptions, source paths, and relationships without using the graph. If class data or the graph library is unavailable, the section reports the problem independently of the other dashboard sections.
+The Architecture section uses Cytoscape.js, served locally rather than from a CDN. It shows one selected class and its direct incoming and outgoing relationships, with neighbors sorted by name. Select a class from the list or graph, and optionally filter by relationship type. Arrows point from the class declaring a relationship to its target. Pan and zoom, use Fit graph to reset the view, or open Class details for its description and source. The alphabetical class list also provides keyboard access to details. If class data or the graph library is unavailable, the section reports the problem independently of the other dashboard sections.
 
 ## LAN security
 

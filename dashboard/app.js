@@ -114,39 +114,71 @@ function renderArchitectureGraph() {
   if (document.getElementById('architecture').hidden || !state.classes.length) return;
   const status = document.getElementById('architecture-status');
   const container = document.getElementById('architecture-graph');
-  if (architectureGraph) {
-    architectureGraph.resize();
-    return;
-  }
   if (typeof cytoscape !== 'function') {
     status.textContent = 'Graph library unavailable. Install dashboard dependencies to display the graph; the class list remains available below.';
     status.hidden = false;
     return;
   }
-  container.hidden = false;
-  const nodeIds = new Map(state.classes.map((item, index) => [item.id, `node-${index}`]));
-  const nodes = state.classes.map(item => ({ data: { id: nodeIds.get(item.id), classId: item.id, label: item.name } }));
-  const edges = [];
+
+  const selectedId = document.getElementById('architecture-class').value;
+  const relationType = document.getElementById('architecture-relation').value;
+  const selected = state.classes.find(item => item.id === selectedId);
+  if (!selected) return;
+  const relations = [];
   state.classes.forEach(item => item.relations.forEach(relation => {
-    edges.push({ data: { id: `edge-${edges.length}`, source: nodeIds.get(item.id), target: nodeIds.get(relation.target), label: relation.type } });
+    if ((item.id === selectedId || relation.target === selectedId) &&
+        (!relationType || relation.type === relationType)) {
+      relations.push({ source: item.id, target: relation.target, label: relation.type });
+    }
   }));
+  const neighborIds = new Set(relations.flatMap(relation => [relation.source, relation.target]));
+  neighborIds.delete(selectedId);
+  const neighbors = state.classes.filter(item => neighborIds.has(item.id))
+    .sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  const nodes = [selected, ...neighbors];
+  const nodeIds = new Map(nodes.map((item, index) => [item.id, `node-${index}`]));
+  const elements = nodes.map((item, index) => {
+    if (!index) return { data: { id: nodeIds.get(item.id), classId: item.id, label: item.name }, position: { x: 0, y: 0 }, classes: 'focused' };
+    const ring = Math.ceil(index / 8);
+    const start = (ring - 1) * 8 + 1;
+    const count = Math.min(8, neighbors.length - start + 1);
+    const angle = 2 * Math.PI * (index - start) / count - Math.PI / 2;
+    return { data: { id: nodeIds.get(item.id), classId: item.id, label: item.name },
+      position: { x: Math.cos(angle) * ring * 300, y: Math.sin(angle) * ring * 180 } };
+  });
+  relations.forEach((relation, index) => elements.push({
+    data: { id: `edge-${index}`, source: nodeIds.get(relation.source), target: nodeIds.get(relation.target), label: relation.label }
+  }));
+  if (architectureGraph) architectureGraph.destroy();
+  container.hidden = false;
   architectureGraph = cytoscape({
     container,
-    elements: [...nodes, ...edges],
+    elements,
     style: [
-      { selector: 'node', style: { label: 'data(label)', 'background-color': '#dceeed', 'border-color': '#478d86', 'border-width': 1, 'text-wrap': 'wrap', 'text-max-width': '150px', 'font-size': 12, 'text-valign': 'center', 'text-halign': 'center', shape: 'round-rectangle', width: 160, height: 50 } },
-      { selector: 'edge', style: { label: 'data(label)', width: 1.5, 'line-color': '#879c9b', 'target-arrow-color': '#879c9b', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'font-size': 10, 'text-background-color': '#fff', 'text-background-opacity': 0.9, 'text-background-padding': '2px' } },
+      { selector: 'node', style: { label: 'data(label)', 'background-color': '#e8f3f2', 'border-color': '#478d86', 'border-width': 1, 'text-wrap': 'wrap', 'text-max-width': '180px', 'font-size': 14, 'text-valign': 'center', 'text-halign': 'center', shape: 'round-rectangle', width: 190, height: 55 } },
+      { selector: 'node.focused', style: { 'background-color': '#b8ded9', 'border-color': '#125f59', 'border-width': 3, 'font-weight': 'bold' } },
+      { selector: 'edge', style: { label: 'data(label)', width: 1.5, 'line-color': '#879c9b', 'target-arrow-color': '#879c9b', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'font-size': 12, 'text-background-color': '#fff', 'text-background-opacity': 0.9, 'text-background-padding': '3px' } },
     ],
-    layout: { name: 'cose', animate: false, padding: 35 },
+    layout: { name: 'preset', fit: true, padding: 40 },
     minZoom: 0.05,
     maxZoom: 3,
   });
   architectureGraph.on('tap', 'node', event => {
-    const item = state.classes.find(candidate => candidate.id === event.target.data('classId'));
-    if (item) showClass(item);
+    document.getElementById('architecture-class').value = event.target.data('classId');
+    renderArchitectureGraph();
   });
   status.hidden = true;
 }
+
+document.getElementById('architecture-class').addEventListener('change', renderArchitectureGraph);
+document.getElementById('architecture-relation').addEventListener('change', renderArchitectureGraph);
+document.getElementById('architecture-fit').addEventListener('click', () => {
+  if (architectureGraph) architectureGraph.fit(undefined, 40);
+});
+document.getElementById('architecture-details').addEventListener('click', () => {
+  const item = state.classes.find(candidate => candidate.id === document.getElementById('architecture-class').value);
+  if (item) showClass(item);
+});
 
 async function loadArchitecture() {
   const status = document.getElementById('architecture-status');
@@ -161,7 +193,22 @@ async function loadArchitecture() {
       empty(list, 'No classes.');
       return;
     }
-    state.classes.forEach(item => {
+    const classSelect = document.getElementById('architecture-class');
+    const sortedClasses = [...state.classes].sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+    sortedClasses.forEach(item => {
+      const option = element('option', item.name);
+      option.value = item.id;
+      classSelect.append(option);
+    });
+    classSelect.value = state.classes[0].id;
+    const types = new Set(state.classes.flatMap(item => item.relations.map(relation => relation.type)));
+    [...types].sort((a, b) => a.localeCompare(b)).forEach(type => {
+      const option = element('option', type);
+      option.value = type;
+      document.getElementById('architecture-relation').append(option);
+    });
+    document.getElementById('architecture-controls').hidden = false;
+    sortedClasses.forEach(item => {
       const card = button('', 'document-card', () => showClass(item));
       card.append(element('strong', item.name), element('span', item.id, 'document-path'));
       list.append(card);
