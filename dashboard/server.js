@@ -17,6 +17,7 @@ const assets = {
   '/index.html': ['index.html', 'text/html; charset=utf-8'],
   '/style.css': ['style.css', 'text/css; charset=utf-8'],
   '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
+  '/cytoscape.min.js': ['node_modules/cytoscape/dist/cytoscape.min.js', 'text/javascript; charset=utf-8'],
 };
 
 function isWithin(parent, child) {
@@ -129,6 +130,26 @@ function validateTasks(tasks) {
   }
 }
 
+function validateClasses(data) {
+  if (!data || !Array.isArray(data.classes)) throw new Error('Class data is not an array');
+  const ids = new Set();
+  for (const item of data.classes) {
+    if (!item || typeof item.id !== 'string' || !item.id || ids.has(item.id) ||
+        typeof item.name !== 'string' || typeof item.description !== 'string' ||
+        typeof item.source !== 'string' || !Array.isArray(item.relations) ||
+        !item.relations.every(relation => relation && typeof relation.target === 'string' &&
+          typeof relation.type === 'string')) {
+      throw new Error('Invalid class record');
+    }
+    ids.add(item.id);
+  }
+  for (const item of data.classes) {
+    if (item.relations.some(relation => !ids.has(relation.target))) {
+      throw new Error(`Invalid relation for class ${item.id}`);
+    }
+  }
+}
+
 const server = http.createServer(async (request, response) => {
   try {
     if (request.method !== 'GET') {
@@ -142,6 +163,13 @@ const server = http.createServer(async (request, response) => {
       const tasks = JSON.parse(tasksText);
       validateTasks(tasks);
       return json(response, 200, { tasks, documents: await listDocuments() });
+    }
+    if (url.pathname === '/api/classes') {
+      const text = await readContained(root, 'classes/classes.json');
+      if (text === null) throw new Error('Class data is unavailable');
+      const data = JSON.parse(text);
+      validateClasses(data);
+      return json(response, 200, data);
     }
     if (url.pathname === '/api/document') {
       const name = url.searchParams.get('path');

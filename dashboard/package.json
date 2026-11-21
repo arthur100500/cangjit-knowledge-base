@@ -1,0 +1,8 @@
+{
+  "name": "cangjit-knowledge-dashboard",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "cytoscape": "3.33.1"
+  }
+}

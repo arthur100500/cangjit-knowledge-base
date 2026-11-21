@@ -6,7 +6,8 @@ const statuses = [
   ['testing', 'Testing'],
   ['done', 'Done']
 ];
-const state = { tasks: [], documents: [] };
+const state = { tasks: [], documents: [], classes: [] };
+let architectureGraph = null;
 const dialog = document.getElementById('detail-dialog');
 const detailTitle = document.getElementById('detail-title');
 const detailLabel = document.getElementById('detail-label');
@@ -39,6 +40,7 @@ function showSection(name) {
     if (active) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   });
+  if (name === 'architecture') renderArchitectureGraph();
 }
 
 document.querySelectorAll('.nav-button').forEach(tab => {
@@ -85,6 +87,92 @@ function showTask(task) {
     const path = String(task.source);
     sourceField.append(button(path, 'inline-link', () => showDocument(path)));
   } else sourceField.append(element('p', 'No source recorded.'));
+}
+
+function showClass(item) {
+  detailRequest++;
+  showDetail('Class', item.name);
+  field('Qualified name').append(element('p', item.id));
+  field('Description').append(element('p', item.description || 'No description.'));
+  field('Source').append(element('p', item.source || 'No source recorded.'));
+  const relations = field('Relationships');
+  if (!item.relations.length) relations.append(element('p', 'No recorded relationships.'));
+  else {
+    const list = element('ul');
+    item.relations.forEach(relation => {
+      const target = state.classes.find(candidate => candidate.id === relation.target);
+      const entry = element('li');
+      entry.append(document.createTextNode(`${relation.type}: `));
+      entry.append(button(target.name, 'inline-link', () => showClass(target)));
+      list.append(entry);
+    });
+    relations.append(list);
+  }
+}
+
+function renderArchitectureGraph() {
+  if (document.getElementById('architecture').hidden || !state.classes.length) return;
+  const status = document.getElementById('architecture-status');
+  const container = document.getElementById('architecture-graph');
+  if (architectureGraph) {
+    architectureGraph.resize();
+    return;
+  }
+  if (typeof cytoscape !== 'function') {
+    status.textContent = 'Graph library unavailable. Install dashboard dependencies to display the graph; the class list remains available below.';
+    status.hidden = false;
+    return;
+  }
+  container.hidden = false;
+  const nodeIds = new Map(state.classes.map((item, index) => [item.id, `node-${index}`]));
+  const nodes = state.classes.map(item => ({ data: { id: nodeIds.get(item.id), classId: item.id, label: item.name } }));
+  const edges = [];
+  state.classes.forEach(item => item.relations.forEach(relation => {
+    edges.push({ data: { id: `edge-${edges.length}`, source: nodeIds.get(item.id), target: nodeIds.get(relation.target), label: relation.type } });
+  }));
+  architectureGraph = cytoscape({
+    container,
+    elements: [...nodes, ...edges],
+    style: [
+      { selector: 'node', style: { label: 'data(label)', 'background-color': '#dceeed', 'border-color': '#478d86', 'border-width': 1, 'text-wrap': 'wrap', 'text-max-width': '150px', 'font-size': 12, 'text-valign': 'center', 'text-halign': 'center', shape: 'round-rectangle', width: 160, height: 50 } },
+      { selector: 'edge', style: { label: 'data(label)', width: 1.5, 'line-color': '#879c9b', 'target-arrow-color': '#879c9b', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'font-size': 10, 'text-background-color': '#fff', 'text-background-opacity': 0.9, 'text-background-padding': '2px' } },
+    ],
+    layout: { name: 'cose', animate: false, padding: 35 },
+    minZoom: 0.05,
+    maxZoom: 3,
+  });
+  architectureGraph.on('tap', 'node', event => {
+    const item = state.classes.find(candidate => candidate.id === event.target.data('classId'));
+    if (item) showClass(item);
+  });
+  status.hidden = true;
+}
+
+async function loadArchitecture() {
+  const status = document.getElementById('architecture-status');
+  const list = document.getElementById('architecture-list');
+  try {
+    const response = await fetch('/api/classes');
+    if (!response.ok) throw new Error(`Server returned ${response.status}`);
+    const data = await response.json();
+    state.classes = data.classes;
+    if (!state.classes.length) {
+      status.textContent = 'No classes documented yet.';
+      empty(list, 'No classes.');
+      return;
+    }
+    state.classes.forEach(item => {
+      const card = button('', 'document-card', () => showClass(item));
+      card.append(element('strong', item.name), element('span', item.id, 'document-path'));
+      list.append(card);
+    });
+    status.hidden = true;
+    renderArchitectureGraph();
+  } catch (error) {
+    status.textContent = `Could not load class data: ${error.message}`;
+    status.classList.add('error');
+    empty(list, 'Class data is unavailable.');
+  }
 }
 
 function renderBoard() {
@@ -343,3 +431,4 @@ async function load() {
   }
 }
 load();
+loadArchitecture();

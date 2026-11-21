@@ -46,6 +46,8 @@ nav { display: flex; gap: 8px; }
 .graph-node:hover rect, .graph-node:focus rect { stroke: #16766e; stroke-width: 2; }
 .graph-node text { font-family: system-ui, sans-serif; fill: #24383b; font-size: 13px; }
 .graph-edge { fill: none; stroke: #879c9b; stroke-width: 1.5; }
+.architecture-graph { width: 100%; height: clamp(400px, 65vh, 800px); background: #fff; border: 1px solid #dce4e6; border-radius: 8px; }
+.architecture-list-heading { margin-top: 32px; }
 .document-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
 .document-list { display: grid; gap: 10px; align-content: start; }
 .document-card { padding: 15px 17px; }
@@ -72,4 +74,4 @@ dialog::backdrop { background: #17292d99; }
 .markdown table { border-collapse: collapse; display: block; overflow-x: auto; }
 .markdown th, .markdown td { border: 1px solid #dce4e6; padding: 6px 10px; text-align: left; }
 @media (max-width: 900px) { .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .header-inner, .container { padding-left: 18px; padding-right: 18px; } .header-inner { display: block; padding-top: 18px; } h1 { margin-bottom: 6px; } nav { margin-left: -12px; } .nav-button { padding: 12px; } .container { padding-top: 26px; } .section-heading, .graph-heading { display: block; } .section-heading > p, .graph-heading > p { margin-top: 8px; } .board, .document-groups { grid-template-columns: 1fr; } .document-groups { gap: 24px; } .dialog-header, .dialog-content { padding-left: 18px; padding-right: 18px; } }
+@media (max-width: 600px) { .header-inner, .container { padding-left: 18px; padding-right: 18px; } .header-inner { display: block; padding-top: 18px; } h1 { margin-bottom: 6px; } nav { margin-left: -12px; flex-wrap: wrap; } .nav-button { padding: 12px; } .container { padding-top: 26px; } .section-heading, .graph-heading { display: block; } .section-heading > p, .graph-heading > p { margin-top: 8px; } .board, .document-groups { grid-template-columns: 1fr; } .document-groups { gap: 24px; } .dialog-header, .dialog-content { padding-left: 18px; padding-right: 18px; } }

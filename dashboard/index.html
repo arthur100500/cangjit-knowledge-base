@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Knowledge dashboard</title>
   <link rel="stylesheet" href="/style.css">
+  <script src="/cytoscape.min.js" defer></script>
   <script src="/app.js" defer></script>
 </head>
 <body>
@@ -14,6 +15,7 @@
       <nav aria-label="Dashboard sections">
         <button class="nav-button active" data-section="tasks" aria-current="page">Tasks</button>
         <button class="nav-button" data-section="knowledge">Knowledge</button>
+        <button class="nav-button" data-section="architecture">Architecture</button>
         <button class="nav-button" data-section="decisions">Decisions</button>
       </nav>
     </div>
@@ -29,6 +31,14 @@
     <section id="knowledge" class="section" aria-labelledby="knowledge-heading" hidden>
       <div class="section-heading"><div><p class="eyebrow">Reference</p><h2 id="knowledge-heading">Knowledge</h2></div><p>Explore knowledge and known issues.</p></div>
       <div class="document-groups"><div><h3>Knowledge</h3><div id="knowledge-list" class="document-list"></div></div><div><h3>Issues</h3><div id="issues-list" class="document-list"></div></div></div>
+    </section>
+    <section id="architecture" class="section" aria-labelledby="architecture-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Class relationships</p><h2 id="architecture-heading">Architecture</h2></div><p>Arrows point from each class to the class it relates to. Select a class for details.</p></div>
+      <p id="architecture-status" class="notice" role="status">Loading class data…</p>
+      <div id="architecture-graph" class="architecture-graph" aria-label="Interactive class relationship graph" hidden></div>
+      <h3 class="architecture-list-heading">Classes</h3>
+      <p>Use this list to explore class descriptions and relationships with a keyboard or screen reader.</p>
+      <div id="architecture-list" class="document-list"></div>
     </section>
     <section id="decisions" class="section" aria-labelledby="decisions-heading" hidden>
       <div class="section-heading"><div><p class="eyebrow">Architecture</p><h2 id="decisions-heading">Decisions</h2></div><p>Recorded decisions and their context.</p></div>
