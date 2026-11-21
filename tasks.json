@@ -1,0 +1,66 @@
+[
+  {
+    "id": "package-typeinfo",
+    "title": "Support JIT-defined package TypeInfo",
+    "status": "icebox",
+    "description": "JIT-defined package type metadata is not yet available; do not substitute fabricated metadata.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "package-globals",
+    "title": "Support package-local globals and initialization",
+    "status": "icebox",
+    "description": "Package-local storage and initialization are unavailable. Preinitialization needs loader metadata and managed global references need GC static roots.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "local-finalizers",
+    "title": "Implement local finalizer lifetime handling",
+    "status": "icebox",
+    "description": "Analyze lifetime frontiers and aliases across branches and exceptional edges; waiting until the end of the region can change behavior.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "external-packages",
+    "title": "Resolve arbitrary external package discovery",
+    "status": "icebox",
+    "description": "External package discovery remains unresolved; missing runtime metadata must not be fabricated.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "dispatch-abi-coverage",
+    "title": "Verify auto-environment dispatch and aggregate ABI",
+    "status": "icebox",
+    "description": "Interface, class and static interface dispatch have been exercised; auto-environment dispatch and aggregate ABI have not.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "nested-this",
+    "title": "Investigate nested This in generated CHIR type arguments",
+    "status": "icebox",
+    "description": "Source syntax rejects nested This in type arguments; whether generated CHIR can contain it remains unverified.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "managed-startup",
+    "title": "Run main through managed startup without a sidecar",
+    "status": "done",
+    "description": "The unused sidecar requirement was removed and managed startup runs main.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "checked-arithmetic",
+    "title": "Match native checked-arithmetic exceptions",
+    "status": "done",
+    "description": "Checked arithmetic uses the native exception factory and exact messages; normal and exceptional cases were exercised.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  }
+]

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Knowledge dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div><p class="eyebrow">Knowledge base</p><h1>Dashboard</h1></div>
+      <nav aria-label="Dashboard sections">
+        <button class="nav-button active" data-section="tasks" aria-current="page">Tasks</button>
+        <button class="nav-button" data-section="knowledge">Knowledge</button>
+        <button class="nav-button" data-section="decisions">Decisions</button>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <p id="load-error" class="notice error" role="alert" hidden></p>
+    <section id="tasks" class="section" aria-labelledby="tasks-heading">
+      <div class="section-heading"><div><p class="eyebrow">Work overview</p><h2 id="tasks-heading">Tasks</h2></div><p>Current work and its dependencies.</p></div>
+      <div id="board" class="board" aria-label="Task board"></div>
+      <div class="graph-heading"><div><p class="eyebrow">Relationships</p><h3>Dependency graph</h3></div><p>Arrows point from a dependency to the task that needs it. Select a task for details.</p></div>
+      <div id="graph" class="graph" aria-label="Task dependency graph"></div>
+    </section>
+    <section id="knowledge" class="section" aria-labelledby="knowledge-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Reference</p><h2 id="knowledge-heading">Knowledge</h2></div><p>Explore knowledge and known issues.</p></div>
+      <div class="document-groups"><div><h3>Knowledge</h3><div id="knowledge-list" class="document-list"></div></div><div><h3>Issues</h3><div id="issues-list" class="document-list"></div></div></div>
+    </section>
+    <section id="decisions" class="section" aria-labelledby="decisions-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Architecture</p><h2 id="decisions-heading">Decisions</h2></div><p>Recorded decisions and their context.</p></div>
+      <div id="decisions-list" class="document-list"></div>
+    </section>
+  </main>
+  <dialog id="detail-dialog" aria-labelledby="detail-title">
+    <div class="dialog-header"><div><p id="detail-label" class="eyebrow"></p><h2 id="detail-title"></h2></div><button id="close-dialog" class="close-button" aria-label="Close details">×</button></div>
+    <div id="detail-content" class="dialog-content"></div>
+  </dialog>
+</body>
+</html>

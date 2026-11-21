@@ -2,8 +2,8 @@
 
 This repository is the shared knowledge base for the cangjit project. It holds
 everything agents discover or decide while working on cangjit, so that
-knowledge survives across sessions and agents. Code lives in the cangjit
-repository; this repository holds only knowledge artifacts.
+knowledge survives across sessions and agents. The cangjit code lives in the
+cangjit repository; this repository also hosts its knowledge dashboard.
 
 The knowledge base is a sibling checkout of the code repository:
 
@@ -29,6 +29,8 @@ The knowledge base is a sibling checkout of the code repository:
 | `ai-insides/`| Information agents acquired that is needed for project understanding (how things work, gotchas, environment quirks). | Any format        |
 | `ai-issues/` | Proposals and issues — each with a name, priority, and brief description. | Markdown (`.md`) |
 | `arch/`      | Architecture designs and decisions that were taken.                      | Markdown (`.md`) |
+| `tasks.json` | Dashboard tasks, statuses, sources and dependencies. | JSON |
+| `dashboard/` | Read-only LAN dashboard for this knowledge base. | JavaScript, HTML, CSS |
 
 ## Rules per folder
 
@@ -74,6 +76,16 @@ place when it changes; add a `Closed:` line rather than deleting the file.
 * State the decision, the alternatives considered, and why this one won.
 * When a design changes, update the file — it must always reflect what is
   currently decided, not history. Superseded designs are deleted, not kept.
+
+### `tasks.json` — task board
+
+Maintain this file when work is identified, started, tested, completed or put
+on hold. Each task has a stable `id`, `title`, `status`, `description`,
+`source` (repository-relative Markdown path), and `dependsOn` (task IDs).
+Statuses are `in-progress`, `icebox`, `testing`, and `done`. Record only
+evidenced dependencies; do not infer them from task order. Keep completed tasks
+and update their status instead of deleting them. Keep issue descriptions in
+`ai-issues/` and link to them as the task source when applicable.
 
 ## When to write
 
