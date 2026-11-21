@@ -75,8 +75,17 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
   instead of silently skipping side effects. Native entry runs the package
   initializer first; preinitialization needs loader metadata and managed global
   references need GC static roots.
-- Local finalizers and arbitrary external package discovery remain unresolved.
-  Do not replace these with fake metadata.
+- Local finalizers remain unsupported. A native package with
+  `public exclave init(this @local!)` and `~init(this @local!)` was compiled
+  with `--experimental --enable-local-mode`; a local allocation finalized
+  before its region ended (native result 42), while JIT explicitly rejected
+  the allocation. Native x86-64 emitted `CJ_MCC_NewLocalObject`,
+  `CJ_MCC_AddLocalFinalizer`, the constructor, `CJ_MCC_RemoveLocalFinalizer`,
+  then `CJ_MCC_EndLocalRegion`. The runtime's remove operation executes the
+  finalizer. Correct frontier and alias analysis must cover branches and
+  exceptional edges; merely waiting for `EndRegion` can change behavior.
+- Arbitrary external package discovery remains unresolved. Do not replace
+  missing runtime metadata with fake metadata.
 - The object-layout, exception-message, package-loading and dispatch
   decisions are in `arch/jit-object-allocation.md`.
 - Build from the parent project root with `./cjb.sh cjc` in the Nix shell.
