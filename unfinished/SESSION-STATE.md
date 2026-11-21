@@ -9,12 +9,12 @@ normal/exceptional edge removals. Definitely local class references are kept
 out of movable-heap stack-map roots; maybe-local references remain guarded.
 
 Native and JIT returned 42 for straight-line finalization, both branch paths,
-an interface cast alias, a throwing method caught in the same function, GC
-inside a finalizer, and a separate live heap object across finalization. A
-throwing constructor returned 0 in both modes. The latest compiler build passed.
-Loop frontiers, stored/escaped aliases, multiple simultaneous finalizers,
-allocation failure, stack-growth interactions and less common exceptional
-edges still require verification. In particular, the current analysis leaves
+loop iterations, an interface cast alias, a throwing method caught in the same
+function, GC inside a finalizer, and a separate live heap object across
+finalization. A throwing constructor returned 0 in both modes. The latest
+compiler build passed. Stored/escaped aliases, multiple simultaneous
+finalizers, allocation failure, stack-growth interactions and less common
+exceptional edges still require verification. In particular, the current analysis leaves
 stored references registered until region end; the native LLVM pass can trace
 some stack slots, so this is not yet a complete equivalence claim.
 

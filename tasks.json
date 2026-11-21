@@ -19,7 +19,7 @@
     "id": "local-finalizers",
     "title": "Implement local finalizer lifetime handling",
     "status": "in-progress",
-    "description": "Uncommitted implementation computes local-finalizer liveness frontiers and emits normal/exceptional edge cleanup. Native and JIT agree on straight-line, branch, interface-alias, throwing-call, reentrant-GC and live heap-root fixtures. Loop behavior, captured references, allocation failure, repeated registration and remaining edge cases are under investigation.",
+    "description": "Uncommitted implementation computes local-finalizer liveness frontiers and emits normal/exceptional edge cleanup. Native and JIT agree on straight-line, branch, loop, interface-alias, throwing-call, reentrant-GC and live heap-root fixtures. Captured references, allocation failure, repeated registration and remaining exceptional edges are under investigation.",
     "source": "unfinished/SESSION-STATE.md",
     "dependsOn": []
   },
