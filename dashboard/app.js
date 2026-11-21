@@ -122,30 +122,18 @@ function renderArchitectureGraph() {
 
   const selectedId = document.getElementById('architecture-class').value;
   const relationType = document.getElementById('architecture-relation').value;
-  const selected = state.classes.find(item => item.id === selectedId);
-  if (!selected) return;
   const relations = [];
   state.classes.forEach(item => item.relations.forEach(relation => {
-    if ((item.id === selectedId || relation.target === selectedId) &&
-        (!relationType || relation.type === relationType)) {
+    if (!relationType || relation.type === relationType) {
       relations.push({ source: item.id, target: relation.target, label: relation.type });
     }
   }));
-  const neighborIds = new Set(relations.flatMap(relation => [relation.source, relation.target]));
-  neighborIds.delete(selectedId);
-  const neighbors = state.classes.filter(item => neighborIds.has(item.id))
-    .sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
-  const nodes = [selected, ...neighbors];
+  const nodes = [...state.classes].sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
   const nodeIds = new Map(nodes.map((item, index) => [item.id, `node-${index}`]));
-  const elements = nodes.map((item, index) => {
-    if (!index) return { data: { id: nodeIds.get(item.id), classId: item.id, label: item.name }, position: { x: 0, y: 0 }, classes: 'focused' };
-    const ring = Math.ceil(index / 8);
-    const start = (ring - 1) * 8 + 1;
-    const count = Math.min(8, neighbors.length - start + 1);
-    const angle = 2 * Math.PI * (index - start) / count - Math.PI / 2;
-    return { data: { id: nodeIds.get(item.id), classId: item.id, label: item.name },
-      position: { x: Math.cos(angle) * ring * 300, y: Math.sin(angle) * ring * 180 } };
-  });
+  const elements = nodes.map(item => ({
+    data: { id: nodeIds.get(item.id), classId: item.id, label: item.name },
+    classes: item.id === selectedId ? 'focused' : ''
+  }));
   relations.forEach((relation, index) => elements.push({
     data: { id: `edge-${index}`, source: nodeIds.get(relation.source), target: nodeIds.get(relation.target), label: relation.label }
   }));
@@ -159,18 +147,24 @@ function renderArchitectureGraph() {
       { selector: 'node.focused', style: { 'background-color': '#b8ded9', 'border-color': '#125f59', 'border-width': 3, 'font-weight': 'bold' } },
       { selector: 'edge', style: { label: 'data(label)', width: 1.5, 'line-color': '#879c9b', 'target-arrow-color': '#879c9b', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'font-size': 12, 'text-background-color': '#fff', 'text-background-opacity': 0.9, 'text-background-padding': '3px' } },
     ],
-    layout: { name: 'preset', fit: true, padding: 40 },
-    minZoom: 0.05,
+    layout: { name: 'cose', animate: false, fit: true, padding: 40, nodeDimensionsIncludeLabels: true },
+    minZoom: 0.001,
     maxZoom: 3,
   });
   architectureGraph.on('tap', 'node', event => {
     document.getElementById('architecture-class').value = event.target.data('classId');
-    renderArchitectureGraph();
+    highlightArchitectureClass();
   });
   status.hidden = true;
 }
 
-document.getElementById('architecture-class').addEventListener('change', renderArchitectureGraph);
+function highlightArchitectureClass() {
+  if (!architectureGraph) return;
+  const selectedId = document.getElementById('architecture-class').value;
+  architectureGraph.nodes().forEach(node => node.toggleClass('focused', node.data('classId') === selectedId));
+}
+
+document.getElementById('architecture-class').addEventListener('change', highlightArchitectureClass);
 document.getElementById('architecture-relation').addEventListener('change', renderArchitectureGraph);
 document.getElementById('architecture-fit').addEventListener('click', () => {
   if (architectureGraph) architectureGraph.fit(undefined, 40);
