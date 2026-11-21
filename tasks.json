@@ -19,7 +19,7 @@
     "id": "local-finalizers",
     "title": "Implement local finalizer lifetime handling",
     "status": "in-progress",
-    "description": "Uncommitted implementation emits local-finalizer registration and liveness-frontier cleanup. Native/JIT comparisons passed straight-line, branch, loop, interface alias, throwing call, failed allocation, two-finalizer ordering, reentrant GC and live heap-root scenarios. Stored/escaped aliases and less common exceptional edges still need investigation.",
+    "description": "Uncommitted registration and liveness-frontier cleanup matches native on straight-line, branch, loop, interface alias, throwing call, failed allocation, two-finalizer ordering, reentrant GC and live heap-root scenarios. Mutable stack aliases previously failed allocation; new stack-slot analysis and local-reference support are being built and tested. Escapes and uncommon exceptional edges remain open.",
     "source": "unfinished/SESSION-STATE.md",
     "dependsOn": []
   },
