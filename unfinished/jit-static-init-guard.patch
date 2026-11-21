@@ -1,0 +1,29 @@
+From c81baa391c014fbc76c9055277de8faae333bc1a Mon Sep 17 00:00:00 2001
+From: Arthur Alekseev <arthur.alekseev.itmo@gmail.com>
+Date: Sat, 21 Nov 2026 03:05:55 +0300
+Subject: [PATCH] Reject skipped static class initializers
+
+---
+ src/JIT/X86_64/X86_64Compiler.cpp | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/JIT/X86_64/X86_64Compiler.cpp b/src/JIT/X86_64/X86_64Compiler.cpp
+index c923ca47..7459f3c3 100644
+--- a/src/JIT/X86_64/X86_64Compiler.cpp
++++ b/src/JIT/X86_64/X86_64Compiler.cpp
+@@ -39,10 +39,9 @@ void X86_64Compiler::Compile(const CHIR::Package& package, std::ostream& output)
+             return;
+         }
+         // The native entry runs package initializers before user.main. Do not
+-        // silently skip source-level initialization with observable effects.
++        // silently skip initialization with observable effects.
+         for (const auto* global : package.GetGlobalVars()) {
+-            if (global && !global->IsImportedVar() && !global->TestAttr(CHIR::Attribute::COMPILER_ADD) &&
+-                global->GetInitFunc()) {
++            if (global && !global->IsImportedVar() && global->GetInitFunc()) {
+                 std::cerr << "JIT: package-local global initialization is not supported\n";
+                 output.setstate(std::ios::badbit);
+                 return;
+-- 
+2.55.0
+

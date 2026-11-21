@@ -2,13 +2,13 @@
 
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
 commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`,
-`69cb8dff22`, `ebe49b5649`, `292122b613`, and `5805d63963`. Pushing `jit_dev`
-failed: GitHub denied SSH identity `arthur100500` access to
+`69cb8dff22`, `ebe49b5649`, `292122b613`, `5805d63963`, and `c81baa391c`.
+Pushing `jit_dev` failed: GitHub denied SSH identity `arthur100500` access to
 `arthur-alekseev-itmo/cangjit.git`. Apply the backups on `9f6ae287` in order:
 `jit-continuation.patch`, `jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
 `jit-concrete-typeinfo.patch`, `jit-generic-allocation.patch`,
-`jit-generic-instanceof.patch`, `jit-any-instanceof.patch`, and
-`jit-global-guard.patch`.
+`jit-generic-instanceof.patch`, `jit-any-instanceof.patch`,
+`jit-global-guard.patch`, and `jit-static-init-guard.patch`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -71,10 +71,11 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 - JIT-defined package TypeInfo and package-local global storage/initialization
   are still unavailable. References to package-local globals now fail with an
   explicit diagnostic rather than attempting to resolve obsolete sidecar slots.
-  Source globals with nonliteral initializer functions are rejected before main
-  instead of silently skipping side effects. Native entry runs the package
-  initializer first; preinitialization needs loader metadata and managed global
-  references need GC static roots.
+  Nonliteral global initializer functions, including compiler-generated class
+  static initializers, are rejected before main instead of silently skipping
+  side effects. Native entry runs the package initializer first;
+  preinitialization needs loader metadata and managed global references need
+  GC static roots.
 - Local finalizers remain unsupported. A native package with
   `public exclave init(this @local!)` and `~init(this @local!)` was compiled
   with `--experimental --enable-local-mode`; a local allocation finalized
