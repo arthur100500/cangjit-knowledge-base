@@ -1,5 +1,27 @@
 # Continuation status (2026-11-21)
 
+## Live work — 2026-11-21 14:33 +03:00
+
+Local-finalizer lifetime support is **in progress and uncommitted** in the
+cangjit worktree. A new CHIR frontier analysis follows the native LLVM pass in
+`third_party/llvmPatch.diff` and emits registration plus after-expression and
+normal/exceptional edge removals. Definitely local class references are kept
+out of movable-heap stack-map roots; maybe-local references remain guarded.
+
+Native and JIT returned 42 for straight-line finalization, both branch paths,
+an interface cast alias, a throwing method caught in the same function, GC
+inside a finalizer, and a separate live heap object across finalization. A
+throwing constructor returned 0 in both modes. The latest compiler build passed.
+Loop frontiers, stored/escaped aliases, multiple simultaneous finalizers,
+allocation failure, stack-growth interactions and less common exceptional
+edges still require verification. In particular, the current analysis leaves
+stored references registered until region end; the native LLVM pass can trace
+some stack slots, so this is not yet a complete equivalence claim.
+
+The dashboard task board is `tasks.json`; update it whenever this status changes.
+The older finalizer-rejection statement below describes the last committed
+checkpoint, not the current uncommitted work.
+
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
 commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`,
 `69cb8dff22`, `ebe49b5649`, `292122b613`, `5805d63963`, `c81baa391c`, and `5d860b5b39`.

@@ -18,8 +18,8 @@
   {
     "id": "local-finalizers",
     "title": "Implement local finalizer lifetime handling",
-    "status": "icebox",
-    "description": "Analyze lifetime frontiers and aliases across branches and exceptional edges; waiting until the end of the region can change behavior.",
+    "status": "in-progress",
+    "description": "Uncommitted implementation computes local-finalizer liveness frontiers and emits normal/exceptional edge cleanup. Native and JIT agree on straight-line, branch, interface-alias, throwing-call, reentrant-GC and live heap-root fixtures. Loop behavior, captured references, allocation failure, repeated registration and remaining edge cases are under investigation.",
     "source": "unfinished/SESSION-STATE.md",
     "dependsOn": []
   },
@@ -60,6 +60,46 @@
     "title": "Match native checked-arithmetic exceptions",
     "status": "done",
     "description": "Checked arithmetic uses the native exception factory and exact messages; normal and exceptional cases were exercised.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": []
+  },
+  {
+    "id": "exception-unwinding",
+    "title": "Support typed exceptions and unwinding",
+    "status": "done",
+    "description": "Standard exception construction, typed catches, cross-frame unwinding and finally paths have been exercised against native execution; JIT-defined exception TypeInfo remains a separate task.",
+    "source": "unfinished/SESSION-STATE.md",
+    "dependsOn": ["managed-startup"]
+  },
+  {
+    "id": "generic-typeinfo",
+    "title": "Construct and forward native generic TypeInfo",
+    "status": "done",
+    "description": "Concrete and dynamic TypeInfos, outer generic parameters, nested arrays, tuples and closures are supported. Native/JIT comparisons covered identity and positive/negative type checks.",
+    "source": "arch/jit-object-allocation.md",
+    "dependsOn": ["managed-startup"]
+  },
+  {
+    "id": "virtual-dispatch",
+    "title": "Support native class and interface dispatch",
+    "status": "done",
+    "description": "Class, interface and static-interface dispatch, including generic introducing types and exceptional calls, were exercised. Auto-environment and aggregate ABI coverage remains separate.",
+    "source": "arch/jit-object-allocation.md",
+    "dependsOn": ["generic-typeinfo"]
+  },
+  {
+    "id": "generic-allocation",
+    "title": "Allocate native generic classes",
+    "status": "done",
+    "description": "Concrete and dynamic class allocations use runtime TypeInfo sizes. Bool and tuple instantiations survived explicit heavy GC in native/JIT comparisons.",
+    "source": "arch/jit-object-allocation.md",
+    "dependsOn": ["generic-typeinfo"]
+  },
+  {
+    "id": "compiler-push",
+    "title": "Push cangjit compiler commits",
+    "status": "icebox",
+    "description": "Blocked: GitHub denied SSH identity arthur100500 access to arthur-alekseev-itmo/cangjit.git. Committed compiler work is backed up as ordered patches in unfinished/ and pushed to the knowledge-base repository.",
     "source": "unfinished/SESSION-STATE.md",
     "dependsOn": []
   }
