@@ -1,6 +1,6 @@
 # Continuation status (2026-11-21)
 
-## Live work — 2026-11-21 14:33 +03:00
+## Live work — 2026-11-21 14:41 +03:00
 
 Local-finalizer lifetime support is **in progress and uncommitted** in the
 cangjit worktree. A new CHIR frontier analysis follows the native LLVM pass in
@@ -11,12 +11,14 @@ out of movable-heap stack-map roots; maybe-local references remain guarded.
 Native and JIT returned 42 for straight-line finalization, both branch paths,
 loop iterations, an interface cast alias, a throwing method caught in the same
 function, GC inside a finalizer, and a separate live heap object across
-finalization. A throwing constructor returned 0 in both modes. The latest
-compiler build passed. Stored/escaped aliases, multiple simultaneous
-finalizers, allocation failure, stack-growth interactions and less common
-exceptional edges still require verification. In particular, the current analysis leaves
-stored references registered until region end; the native LLVM pass can trace
-some stack slots, so this is not yet a complete equivalence claim.
+finalization. A throwing constructor returned 0 in both modes. Two finalizers
+at the same frontier ran in order 21 in both modes. With
+`cjLocalRegionMaxSize=1KB`, a failed local allocation was caught and no
+finalizer ran (native and JIT returned 42). The latest compiler build passed.
+Stored/escaped aliases, stack-growth interactions and less common exceptional
+edges still need verification. The current analysis leaves stored references
+registered until region end; native LLVM can trace some stack slots, so this is
+not yet a complete equivalence claim.
 
 The dashboard task board is `tasks.json`; update it whenever this status changes.
 The older finalizer-rejection statement below describes the last committed
