@@ -139,6 +139,16 @@ function layoutGraph(tasks) {
 function renderGraph() {
   const graph = document.getElementById('graph');
   graph.replaceChildren();
+  const legend = element('div', undefined, 'graph-legend');
+  legend.setAttribute('aria-label', 'Task status colors');
+  statuses.forEach(([status, label]) => {
+    const item = element('span', undefined, `legend-item status-${status}`);
+    const swatch = element('span', undefined, 'legend-swatch');
+    swatch.setAttribute('aria-hidden', 'true');
+    item.append(swatch, document.createTextNode(label));
+    legend.append(item);
+  });
+  graph.append(legend);
   if (!state.tasks.length) { empty(graph, 'No tasks to display.'); return; }
   const columns = layoutGraph(state.tasks);
   if (!columns) {
@@ -171,7 +181,8 @@ function renderGraph() {
   });
   state.tasks.forEach(task => {
     const { x, y } = positions.get(task.id);
-    const group = svgElement('g', { class: 'graph-node', tabindex: 0, role: 'button', 'aria-label': `${task.title || task.id}, ${task.status}` });
+    const statusLabel = statuses.find(([id]) => id === task.status)?.[1] || task.status;
+    const group = svgElement('g', { class: `graph-node status-${task.status}`, tabindex: 0, role: 'button', 'aria-label': `${task.title || task.id}, ${statusLabel}` });
     group.append(svgElement('rect', { x, y, width: 190, height: 56, rx: 6 }));
     const title = svgElement('title');
     title.textContent = task.title || task.id;

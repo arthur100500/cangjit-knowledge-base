@@ -34,8 +34,15 @@ nav { display: flex; gap: 8px; }
 .graph-heading h3 { margin-bottom: 0; font-size: 1.25rem; }
 .graph { overflow: auto; background: #fff; border: 1px solid #dce4e6; border-radius: 8px; padding: 16px; }
 .graph svg { display: block; max-width: none; }
+.graph-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 16px; font-size: .85rem; color: #53676e; }
+.legend-item { display: inline-flex; align-items: center; gap: 7px; }
+.legend-swatch { width: 14px; height: 14px; border: 1px solid var(--status-border); border-radius: 3px; background: var(--status-fill); }
+.status-in-progress { --status-fill: #dcecff; --status-border: #6c96c8; }
+.status-icebox { --status-fill: #edf0f2; --status-border: #9aa9b1; }
+.status-testing { --status-fill: #fff0c9; --status-border: #c5a25b; }
+.status-done { --status-fill: #def1df; --status-border: #75a97c; }
 .graph-node { cursor: pointer; }
-.graph-node rect { fill: #f5f8f8; stroke: #b4c9c7; }
+.graph-node rect { fill: var(--status-fill, #f5f8f8); stroke: var(--status-border, #b4c9c7); }
 .graph-node:hover rect, .graph-node:focus rect { stroke: #16766e; stroke-width: 2; }
 .graph-node text { font-family: system-ui, sans-serif; fill: #24383b; font-size: 13px; }
 .graph-edge { fill: none; stroke: #879c9b; stroke-width: 1.5; }
