@@ -1,0 +1,38 @@
+From 5d860b5b39555d3423af90f4fb1e83656484a936 Mon Sep 17 00:00:00 2001
+From: Arthur Alekseev <arthur.alekseev.itmo@gmail.com>
+Date: Sat, 21 Nov 2026 03:09:25 +0300
+Subject: [PATCH] Diagnose unsupported local finalizer lifetimes
+
+---
+ src/JIT/X86_64/Compilers/Context/JitFailures.inc      | 1 +
+ src/JIT/X86_64/Compilers/Expression/CompileObject.cpp | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/JIT/X86_64/Compilers/Context/JitFailures.inc b/src/JIT/X86_64/Compilers/Context/JitFailures.inc
+index 3ffcafe1..049c4c3d 100644
+--- a/src/JIT/X86_64/Compilers/Context/JitFailures.inc
++++ b/src/JIT/X86_64/Compilers/Context/JitFailures.inc
+@@ -10,6 +10,7 @@ JIT_FAILURE(StackFrameTooLarge, "stack frame is too large")
+ JIT_FAILURE(UnsupportedReturnType, "unsupported function return type")
+ JIT_FAILURE(UnsupportedExpression, "unsupported expression")
+ JIT_FAILURE(UnsupportedAllocation, "allocation requires a scalar integer or boolean type and a stack slot")
++JIT_FAILURE(UnsupportedLocalFinalizer, "local finalizer lifetime handling is not supported")
+ JIT_FAILURE(UnsupportedMemoryAccess, "load or store requires a matching scalar integer or boolean reference")
+ JIT_FAILURE(MissingBinaryOperandOrType, "binary expression has missing operand or type")
+ JIT_FAILURE(IncompatibleBinaryTypes, "binary expression has incompatible operand or result types")
+diff --git a/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp b/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp
+index 431d2f17..67d2338f 100644
+--- a/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp
++++ b/src/JIT/X86_64/Compilers/Expression/CompileObject.cpp
+@@ -77,7 +77,7 @@ void CompileAllocation(FunctionContext& context, const CHIR::AllocateBase& expre
+     if (local && def->GetFinalizer()) {
+         // A local finalizer must be removed on every dead-out frontier,
+         // including exceptional edges and aliases, before its region ends.
+-        context.Fail(JitFailureKind::UnsupportedAllocation, expression.GetExprKind());
++        context.Fail(JitFailureKind::UnsupportedLocalFinalizer, expression.GetExprKind());
+         return;
+     }
+ 
+-- 
+2.55.0
+

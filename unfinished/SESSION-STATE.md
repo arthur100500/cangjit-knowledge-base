@@ -2,13 +2,14 @@
 
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
 commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`,
-`69cb8dff22`, `ebe49b5649`, `292122b613`, `5805d63963`, and `c81baa391c`.
+`69cb8dff22`, `ebe49b5649`, `292122b613`, `5805d63963`, `c81baa391c`, and `5d860b5b39`.
 Pushing `jit_dev` failed: GitHub denied SSH identity `arthur100500` access to
 `arthur-alekseev-itmo/cangjit.git`. Apply the backups on `9f6ae287` in order:
 `jit-continuation.patch`, `jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
 `jit-concrete-typeinfo.patch`, `jit-generic-allocation.patch`,
 `jit-generic-instanceof.patch`, `jit-any-instanceof.patch`,
-`jit-global-guard.patch`, and `jit-static-init-guard.patch`.
+`jit-global-guard.patch`, `jit-static-init-guard.patch`, and
+`jit-finalizer-diagnostic.patch`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -79,8 +80,9 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 - Local finalizers remain unsupported. A native package with
   `public exclave init(this @local!)` and `~init(this @local!)` was compiled
   with `--experimental --enable-local-mode`; a local allocation finalized
-  before its region ended (native result 42), while JIT explicitly rejected
-  the allocation. Native x86-64 emitted `CJ_MCC_NewLocalObject`,
+  before its region ended (native result 42), while JIT rejects it with the
+  explicit diagnostic `local finalizer lifetime handling is not supported`.
+  Native x86-64 emitted `CJ_MCC_NewLocalObject`,
   `CJ_MCC_AddLocalFinalizer`, the constructor, `CJ_MCC_RemoveLocalFinalizer`,
   then `CJ_MCC_EndLocalRegion`. The runtime's remove operation executes the
   finalizer. Correct frontier and alias analysis must cover branches and
