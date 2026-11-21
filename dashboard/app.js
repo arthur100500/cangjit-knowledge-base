@@ -115,14 +115,38 @@ function svgElement(tag, attributes = {}) {
   return node;
 }
 
+function layoutGraph(tasks) {
+  const nodes = new Map(tasks.map(task => [task.id, { task, remaining: task.dependsOn.length, depth: 0, next: [] }]));
+  for (const node of nodes.values()) {
+    for (const dependency of node.task.dependsOn) nodes.get(dependency).next.push(node);
+  }
+  const queue = [...nodes.values()].filter(node => node.remaining === 0);
+  for (let i = 0; i < queue.length; i++) {
+    const node = queue[i];
+    for (const next of node.next) {
+      next.depth = Math.max(next.depth, node.depth + 1);
+      if (--next.remaining === 0) queue.push(next);
+    }
+  }
+  if (queue.length !== tasks.length) return null;
+  const columns = [];
+  for (const node of nodes.values()) {
+    (columns[node.depth] ||= []).push(node.task);
+  }
+  return columns;
+}
+
 function renderGraph() {
   const graph = document.getElementById('graph');
   graph.replaceChildren();
   if (!state.tasks.length) { empty(graph, 'No tasks to display.'); return; }
-  // A fixed grid keeps every task visible, including isolated tasks and cycles.
-  const columns = Math.min(3, state.tasks.length);
-  const width = columns * 240;
-  const height = Math.ceil(state.tasks.length / columns) * 110;
+  const columns = layoutGraph(state.tasks);
+  if (!columns) {
+    graph.append(element('p', 'Dependency cycle detected. Fix the task dependencies to display the graph.', 'error notice'));
+    return;
+  }
+  const width = columns.length * 260;
+  const height = Math.max(...columns.map(column => column.length)) * 110;
   const svg = svgElement('svg', { width, height, viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': 'Task dependencies' });
   const defs = svgElement('defs');
   const marker = svgElement('marker', { id: 'arrow', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' });
@@ -130,21 +154,18 @@ function renderGraph() {
   defs.append(marker);
   svg.append(defs);
   const positions = new Map();
-  state.tasks.forEach((task, index) => positions.set(task.id, { x: (index % columns) * 240 + 20, y: Math.floor(index / columns) * 110 + 20 }));
+  columns.forEach((column, columnIndex) => {
+    column.forEach((task, row) => positions.set(task.id, { x: columnIndex * 260 + 20, y: row * 110 + 20 }));
+  });
   state.tasks.forEach(task => {
     const target = positions.get(task.id);
     (Array.isArray(task.dependsOn) ? task.dependsOn : []).forEach(id => {
       const source = positions.get(id);
       if (!source) return;
-      let path;
-      if (id === task.id) {
-        path = `M ${source.x + 190} ${source.y + 18} C ${source.x + 230} ${source.y - 20}, ${source.x + 160} ${source.y - 25}, ${source.x + 150} ${source.y}`;
-      } else {
-        const x1 = source.x + 95, y1 = source.y + 56;
-        const x2 = target.x + 95, y2 = target.y;
-        const bend = Math.max(28, Math.abs(y2 - y1) / 2);
-        path = `M ${x1} ${y1} C ${x1} ${y1 + bend}, ${x2} ${y2 - bend}, ${x2} ${y2}`;
-      }
+      const x1 = source.x + 190, y1 = source.y + 28;
+      const x2 = target.x, y2 = target.y + 28;
+      const bend = (x2 - x1) / 2;
+      const path = `M ${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
       svg.append(svgElement('path', { d: path, class: 'graph-edge', 'marker-end': 'url(#arrow)' }));
     });
   });
