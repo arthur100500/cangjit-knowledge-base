@@ -24,6 +24,14 @@
     "dependsOn": []
   },
   {
+    "id": "jit-stack-overflow-crash",
+    "title": "Fix JIT stack-overflow crash",
+    "status": "icebox",
+    "description": "A 3,000-deep recursive JIT run with a live local alias segfaulted in runtime stack growth while native returned 42. Isolate the trigger and repair stack growth/overflow handling; the 100-deep case matched.",
+    "source": "ai-issues/001-jit-stack-overflow.md",
+    "dependsOn": []
+  },
+  {
     "id": "external-packages",
     "title": "Resolve arbitrary external package discovery",
     "status": "icebox",
