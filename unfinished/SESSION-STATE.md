@@ -1,9 +1,9 @@
 # Continuation status (2026-11-21)
 
-## Live work — 2026-11-21 14:49 +03:00
+## Checkpoint — 2026-11-21 14:53 +03:00
 
-Local-finalizer lifetime support is **in progress and uncommitted** in the
-cangjit worktree. A new CHIR frontier analysis follows the native LLVM pass in
+Local-finalizer lifetime support is committed in cangjit as `676c60dea3`.
+The CHIR frontier analysis follows the native LLVM pass in
 `third_party/llvmPatch.diff` and emits registration plus after-expression and
 normal/exceptional edge removals. Definitely local class references are kept
 out of movable-heap stack-map roots; maybe-local references remain guarded.
@@ -18,24 +18,29 @@ finalizer ran (native and JIT returned 42). The latest compiler build passed.
 Stack-slot representative analysis and stack slots containing definitely-local
 class references are implemented. A single mutable alias, conditional
 replacement on both branch paths, and a live alias across forced heavy GC each
-returned 1 in native and JIT execution. Escaped addresses, stack growth and
-less common exceptional edges still need investigation. A subsequent
-unreachable-block fix has not yet been rebuilt.
+returned 1 in native and JIT execution. The final compiler build passed, then
+the GC alias, conditional alias, caught exception, two-finalizer order and
+failed-allocation JIT cases passed again. Escaped addresses and uncommon
+exceptional edges remain unverified; the task is on hold.
 
-The dashboard task board is `tasks.json`; update it whenever this status changes.
-The older finalizer-rejection statement below describes the last committed
-checkpoint, not the current uncommitted work.
+At depth 3,000, a recursive JIT fixture with a live local alias crashed in
+runtime stack-overflow handling; the equivalent bounded native check returned
+42. At depth 100 both returned 101. See `ai-issues/001-jit-stack-overflow.md`
+for exact sources and commands. The cause is not yet isolated.
+
+The dashboard task board is `tasks.json`; update it whenever status changes.
 
 The saved patch below was committed in cangjit as `9f6ae287`; subsequent local
 commits are `1624147930`, `f332de5f67`, `1e59a2ece6`, `a6374a8bd1`,
-`69cb8dff22`, `ebe49b5649`, `292122b613`, `5805d63963`, `c81baa391c`, and `5d860b5b39`.
-Pushing `jit_dev` failed: GitHub denied SSH identity `arthur100500` access to
-`arthur-alekseev-itmo/cangjit.git`. Apply the backups on `9f6ae287` in order:
-`jit-continuation.patch`, `jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
+`69cb8dff22`, `ebe49b5649`, `292122b613`, `5805d63963`, `c81baa391c`,
+`5d860b5b39`, and `676c60dea3`. Pushing `jit_dev` failed again: GitHub denied
+SSH identity `arthur100500` access to `arthur-alekseev-itmo/cangjit.git`.
+Apply the backups on `9f6ae287` in order: `jit-continuation.patch`,
+`jit-generic-typeinfo.patch`, `jit-outer-typeinfo.patch`,
 `jit-concrete-typeinfo.patch`, `jit-generic-allocation.patch`,
 `jit-generic-instanceof.patch`, `jit-any-instanceof.patch`,
-`jit-global-guard.patch`, `jit-static-init-guard.patch`, and
-`jit-finalizer-diagnostic.patch`.
+`jit-global-guard.patch`, `jit-static-init-guard.patch`,
+`jit-finalizer-diagnostic.patch`, and `0012-local-finalizer-frontiers.patch`.
 Code changes are confined to `src/JIT/**`. The
 knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
 `AGENTS.md` links to it.
@@ -103,16 +108,10 @@ knowledge-base instructions were merged into `AGENTS.md`; cangjit's root
   side effects. Native entry runs the package initializer first;
   preinitialization needs loader metadata and managed global references need
   GC static roots.
-- Local finalizers remain unsupported. A native package with
-  `public exclave init(this @local!)` and `~init(this @local!)` was compiled
-  with `--experimental --enable-local-mode`; a local allocation finalized
-  before its region ended (native result 42), while JIT rejects it with the
-  explicit diagnostic `local finalizer lifetime handling is not supported`.
-  Native x86-64 emitted `CJ_MCC_NewLocalObject`,
-  `CJ_MCC_AddLocalFinalizer`, the constructor, `CJ_MCC_RemoveLocalFinalizer`,
-  then `CJ_MCC_EndLocalRegion`. The runtime's remove operation executes the
-  finalizer. Correct frontier and alias analysis must cover branches and
-  exceptional edges; merely waiting for `EndRegion` can change behavior.
+- Local finalizer registration and frontier cleanup are implemented in
+  `676c60dea3`; coverage and outstanding edge cases are recorded in the
+  checkpoint above and `tasks.json`. Native `CJ_MCC_RemoveLocalFinalizer`
+  executes the finalizer; waiting only for `EndRegion` changes behavior.
 - Arbitrary external package discovery remains unresolved. Do not replace
   missing runtime metadata with fake metadata.
 - The object-layout, exception-message, package-loading and dispatch

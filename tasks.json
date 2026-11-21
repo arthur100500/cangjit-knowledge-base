@@ -18,8 +18,8 @@
   {
     "id": "local-finalizers",
     "title": "Implement local finalizer lifetime handling",
-    "status": "in-progress",
-    "description": "Uncommitted registration and frontier cleanup matches native on straight-line, branch, loop, interface and mutable stack aliases, failed allocation, exceptions, finalizer ordering and GC. Stack aliases passed both branch paths and forced GC. Escaped addresses, stack growth and uncommon exceptional edges remain open.",
+    "status": "icebox",
+    "description": "Registration and frontier cleanup are committed and match native on straight-line, branch, loop, interface and mutable stack aliases, failed allocation, exceptions, finalizer ordering and GC. Resume with escaped-address and uncommon exceptional-edge coverage; deep stack-growth failure is tracked separately.",
     "source": "unfinished/SESSION-STATE.md",
     "dependsOn": []
   },

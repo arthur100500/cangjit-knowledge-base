@@ -87,6 +87,17 @@ evidenced dependencies; do not infer them from task order. Keep completed tasks
 and update their status instead of deleting them. Keep issue descriptions in
 `ai-issues/` and link to them as the task source when applicable.
 
+## Development cadence
+
+Take development in small, coherent steps so the user can understand and stay
+involved in the project. Explain the intent and outcome of each substantive
+step, including decisions, tradeoffs, verification and blockers, and let the
+user steer before expanding the scope.
+
+Log tasks frequently as work is identified, started, tested, blocked, completed
+or put on hold. Keep `tasks.json` and its linked notes current during the work,
+not only at the end; record unfinished work and concrete evidence promptly.
+
 ## When to write
 
 While working on cangjit, write to the knowledge base at these points, not

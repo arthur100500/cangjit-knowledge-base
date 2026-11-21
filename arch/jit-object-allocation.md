@@ -91,6 +91,24 @@ native libraries: unreachable heap objects may still reference their TypeInfos.
 Borrowed-runtime callers must quiesce GC and ensure no heap object references
 those libraries before shutdown.
 
+## Local class finalization
+
+For a definitely local class with a finalizer, allocate with
+`CJ_MCC_NewLocalObject`, register with `CJ_MCC_AddLocalFinalizer` before the
+constructor, and remove the registration at the CHIR liveness frontier.
+`CJ_MCC_RemoveLocalFinalizer` runs the finalizer. Cleanup can occur after an
+expression or on a normal or exceptional CFG edge. Representative tracking
+follows class casts, element references and nonescaping stack slots; escaped
+references remain registered until region end, as in the native LLVM pass.
+Live definitely-local class references are stable region addresses, not
+movable-heap roots. Stack slots containing them are tracked as stack addresses.
+
+Native/JIT comparisons exercised straight-line, branch, loop, stack and
+interface aliases, failed allocation, constructor and method exceptions,
+multiple-finalizer order, and heavy GC. Escaped-address and less common edge
+cases remain unverified. Deep recursion exposed the separate stack-overflow
+crash in `ai-issues/001-jit-stack-overflow.md`.
+
 ## Checked arithmetic exceptions
 
 Match native CodeGen's exception path: construct deduplicated, stable literal
