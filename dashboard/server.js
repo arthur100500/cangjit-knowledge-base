@@ -177,6 +177,22 @@ const server = http.createServer(async (request, response) => {
       if (content === null) return json(response, 404, { error: 'Document not found' });
       return json(response, 200, { path: name, content });
     }
+    if (url.pathname === '/api/insides-image') {
+      const name = url.searchParams.get('path');
+      const parts = typeof name === 'string' ? name.split('/') : [];
+      if (!parts.length || parts.some(part => !part || part === '.' || part === '..' || part.includes('\\') || part.includes('\0')) || !name.endsWith('.svg')) {
+        return json(response, 404, { error: 'Image not found' });
+      }
+      let content;
+      try {
+        content = await readContained(path.join(root, 'ai-insides'), name);
+      } catch (error) {
+        if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR' && error.code !== 'ELOOP') throw error;
+      }
+      if (content == null) return json(response, 404, { error: 'Image not found' });
+      response.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+      return send(response, 200, content, 'image/svg+xml; charset=utf-8');
+    }
     if (Object.hasOwn(assets, url.pathname)) {
       const [name, type] = assets[url.pathname];
       const content = await readContained(__dirname, name);

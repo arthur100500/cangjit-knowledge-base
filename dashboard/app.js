@@ -346,23 +346,43 @@ function renderDocuments() {
 }
 
 // Markdown is constructed with DOM text nodes, never interpreted as HTML.
-function inline(parent, text) {
-  const pattern = /(`[^`]+`|\[[^\]]+\]\([^\s)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g;
+function inline(parent, text, documentPath) {
+  const pattern = /(`[^`]+`|!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^\s)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g;
   let position = 0;
   for (const match of text.matchAll(pattern)) {
     parent.append(document.createTextNode(text.slice(position, match.index)));
     const token = match[0];
     if (token.startsWith('`')) parent.append(element('code', token.slice(1, -1)));
-    else if (token.startsWith('[')) {
+    else if (token.startsWith('![')) {
+      const parts = /^!\[([^\]]*)\]\(([^)]+)\)$/.exec(token);
+      const imagePath = parts[2];
+      const segments = imagePath.split('/');
+      if (documentPath.startsWith('ai-insides/') && imagePath.endsWith('.svg') &&
+          segments.every(part => part && part !== '.' && part !== '..' && !/[\\%?#:\s]/.test(part))) {
+        const directory = documentPath.slice('ai-insides/'.length, documentPath.lastIndexOf('/') + 1);
+        const image = element('img');
+        image.alt = parts[1];
+        image.src = `/api/insides-image?path=${encodeURIComponent(directory + imagePath)}`;
+        parent.append(image);
+      } else parent.append(document.createTextNode(token));
+    } else if (token.startsWith('[')) {
       const parts = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(token);
-      let url;
-      try { url = new URL(parts[2], window.location.href); } catch { /* Render invalid links as text. */ }
-      if (url && (url.protocol === 'http:' || url.protocol === 'https:')) {
-        const link = element('a', parts[1]);
-        link.href = url.href;
-        link.rel = 'noopener noreferrer';
-        parent.append(link);
-      } else parent.append(document.createTextNode(parts[1]));
+      const target = parts[2];
+      const segments = target.split('/');
+      if (documentPath.startsWith('ai-insides/') && target.endsWith('.md') &&
+          segments.every(part => part && part !== '.' && part !== '..' && !/[\\%?#:\s]/.test(part))) {
+        const directory = documentPath.slice(0, documentPath.lastIndexOf('/') + 1);
+        parent.append(button(parts[1], 'inline-link', () => showDocument(directory + target)));
+      } else {
+        let url;
+        try { url = new URL(target, window.location.href); } catch { /* Render invalid links as text. */ }
+        if (url && (url.protocol === 'http:' || url.protocol === 'https:')) {
+          const link = element('a', parts[1]);
+          link.href = url.href;
+          link.rel = 'noopener noreferrer';
+          parent.append(link);
+        } else parent.append(document.createTextNode(parts[1]));
+      }
     } else if (token.startsWith('**')) parent.append(element('strong', token.slice(2, -2)));
     else parent.append(element('em', token.slice(1, -1)));
     position = match.index + token.length;
@@ -370,7 +390,7 @@ function inline(parent, text) {
   parent.append(document.createTextNode(text.slice(position)));
 }
 
-function renderMarkdown(content) {
+function renderMarkdown(content, documentPath) {
   const article = element('article', undefined, 'markdown');
   const lines = String(content).replace(/\r\n?/g, '\n').split('\n');
   let i = 0;
@@ -393,14 +413,14 @@ function renderMarkdown(content) {
       const table = element('table');
       const head = element('thead');
       const headingRow = element('tr');
-      cells(line).forEach(text => { const th = element('th'); inline(th, text); headingRow.append(th); });
+      cells(line).forEach(text => { const th = element('th'); inline(th, text, documentPath); headingRow.append(th); });
       head.append(headingRow);
       table.append(head);
       i += 2;
       const body = element('tbody');
       while (i < lines.length && lines[i].trim() && lines[i].includes('|')) {
         const row = element('tr');
-        cells(lines[i++]).forEach(text => { const td = element('td'); inline(td, text); row.append(td); });
+        cells(lines[i++]).forEach(text => { const td = element('td'); inline(td, text, documentPath); row.append(td); });
         body.append(row);
       }
       table.append(body);
@@ -410,7 +430,7 @@ function renderMarkdown(content) {
     const heading = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
     if (heading) {
       const node = element(`h${heading[1].length}`);
-      inline(node, heading[2]); article.append(node); i++; continue;
+      inline(node, heading[2], documentPath); article.append(node); i++; continue;
     }
     if (/^\s*([-*_])(?:\s*\1){2,}\s*$/.test(line)) { article.append(element('hr')); i++; continue; }
     const listMatch = /^\s*([-+*]|\d+[.)])\s+(.+)$/.exec(line);
@@ -420,7 +440,7 @@ function renderMarkdown(content) {
       while (i < lines.length) {
         const item = /^\s*([-+*]|\d+[.)])\s+(.+)$/.exec(lines[i]);
         if (!item || /^\d/.test(item[1]) !== ordered) break;
-        const li = element('li'); inline(li, item[2]); list.append(li); i++;
+        const li = element('li'); inline(li, item[2], documentPath); list.append(li); i++;
       }
       article.append(list); continue;
     }
@@ -428,14 +448,14 @@ function renderMarkdown(content) {
       const quote = element('blockquote');
       const quoted = [];
       while (i < lines.length && /^\s*>/.test(lines[i])) quoted.push(lines[i++].replace(/^\s*>\s?/, ''));
-      inline(quote, quoted.join(' ')); article.append(quote); continue;
+      inline(quote, quoted.join(' '), documentPath); article.append(quote); continue;
     }
     const paragraph = [];
     while (i < lines.length && lines[i].trim()) {
       if (paragraph.length && /^(?:\s*(`{3,}|~{3,}|>|[-+*]\s+|\d+[.)]\s+)|#{1,6}\s+)/.test(lines[i])) break;
       paragraph.push(lines[i++].trim());
     }
-    const p = element('p'); inline(p, paragraph.join(' ')); article.append(p);
+    const p = element('p'); inline(p, paragraph.join(' '), documentPath); article.append(p);
   }
   return article;
 }
@@ -450,7 +470,7 @@ async function showDocument(path) {
     if (!response.ok) throw new Error(`Server returned ${response.status}`);
     const data = await response.json();
     if (request !== detailRequest) return;
-    detailContent.replaceChildren(element('p', data.path, 'document-path'), renderMarkdown(data.content));
+    detailContent.replaceChildren(element('p', data.path, 'document-path'), renderMarkdown(data.content, data.path));
   } catch (error) {
     if (request !== detailRequest) return;
     detailContent.replaceChildren(element('p', `Could not load document: ${error.message}`, 'notice error'));

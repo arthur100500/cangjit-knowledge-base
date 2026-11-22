@@ -110,5 +110,13 @@
     "description": "Blocked: GitHub denied SSH identity arthur100500 access to arthur-alekseev-itmo/cangjit.git. Committed compiler work is backed up as ordered patches in unfinished/ and pushed to the knowledge-base repository.",
     "source": "unfinished/SESSION-STATE.md",
     "dependsOn": []
+  },
+  {
+    "id": "runtime-abi-knowledge",
+    "title": "Document runtime and ABI topics",
+    "status": "done",
+    "description": "Documented all 18 requested topics with source-backed examples and diagrams; checked the dashboard stack illustration and note links.",
+    "source": "ai-insides/abi-stack-frames.md",
+    "dependsOn": []
   }
 ]
