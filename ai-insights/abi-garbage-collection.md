@@ -15,7 +15,7 @@ unreachable object C ------------------------------------> candidate garbage
 
 A moving collector must find **locations** containing roots and update them, not merely discover object addresses. `runtime/src/Heap/Collector/TracingCollector.cpp`, `VisitStackRoots`, visits slot and register roots from frame maps; its derived-pointer handling runs after base roots. `runtime/src/Heap/Heap.h` exposes static and export root registration. Other runtime/concurrency and finalizer roots are visited by collector code; a raw pointer held only in unregistered native storage is not thereby a GC root.
 
-For the x86-64 JIT, `src/JIT/X86_64/Compilers/Context/SafepointRecorder.cpp`, `Record`, computes liveness and records GC registers, slots and derived roots through `JitMetadataBuilder::RecordSafepoint`. `src/JIT/X86_64/JitMetadataBuilder.cpp`, `BuildStackMap`, encodes these records. This is the current JIT mechanism; native AOT metadata has its own producer, so do not assume JIT internals describe native compiler emission. Exact supported expression and root shapes are conditional on JIT lowering and liveness checks.
+For the x86-64 JIT, `src/JIT/X86_64/Compilers/Context/SafepointRecorder.cpp`, `Record`, computes liveness and records GC registers, slots and derived roots through `JitMetadataBuilder::RecordSafepoint`. `src/JIT/Runtime/JitMetadataBuilder.cpp`, `BuildStackMap`, encodes these records. This is the current JIT mechanism; native AOT metadata has its own producer, so do not assume JIT internals describe native compiler emission. Exact supported expression and root shapes are conditional on JIT lowering and liveness checks.
 
 ## Phases and barriers
 

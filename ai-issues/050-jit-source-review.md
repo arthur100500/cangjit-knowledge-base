@@ -72,13 +72,13 @@ Review each file below individually. Absence of a FIX comment is only an inferen
 
 ## Added since the inventory
 
-- [TODO] `src/JIT/X86_64/JitRuntime.cpp`
-- [TODO] `src/JIT/X86_64/JitRuntime.h`
-- [TODO] `src/JIT/X86_64/RuntimeError.h`
-- [TODO] `src/JIT/X86_64/RuntimeConfig.h`
-- [TODO] `src/JIT/X86_64/RuntimeFunctions.inc`
-- [TODO] `src/JIT/X86_64/Compilers/Context/StringLiteralPool.cpp`
-- [TODO] `src/JIT/X86_64/Compilers/Context/StringLiteralPool.h`
+- [TODO] `src/JIT/Runtime/JitRuntime.cpp`
+- [TODO] `src/JIT/Runtime/JitRuntime.h`
+- [TODO] `src/JIT/Runtime/RuntimeError.h`
+- [TODO] `src/JIT/Runtime/RuntimeConfig.h`
+- [TODO] `src/JIT/Runtime/RuntimeFunctions.inc`
+- [TODO] `src/JIT/Runtime/StringLiteralPool.cpp`
+- [TODO] `src/JIT/Runtime/StringLiteralPool.h`
 - [TODO] `src/JIT/X86_64/Compilers/Context/TypeInfoEmitter.cpp`
 - [TODO] `src/JIT/X86_64/Compilers/Context/TypeInfoEmitter.h`
 - [TODO] `src/JIT/X86_64/Compilers/Context/SafepointRecorder.cpp`

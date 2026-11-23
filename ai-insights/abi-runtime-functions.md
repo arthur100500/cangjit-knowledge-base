@@ -1,6 +1,6 @@
 # [ABI INFO] Runtime function catalogue
 
-Scope: source snapshot inspected 2026-11-23, x86-64 Linux JIT bindings, not a promise of a stable public ABI. The authoritative list is `cangjit/src/JIT/X86_64/RuntimeFunctions.inc`; native compiler calls are not necessarily limited to this list. The first eight entries have types inferred with `decltype` from runtime declarations; all other entries are stored as `void*`, which does **not** specify a callable signature. Names below classify the intended family, not a complete behavioral contract.
+Scope: source snapshot inspected 2026-11-23, x86-64 Linux JIT bindings, not a promise of a stable public ABI. The authoritative list is `cangjit/src/JIT/Runtime/RuntimeFunctions.inc`; native compiler calls are not necessarily limited to this list. The first eight entries have types inferred with `decltype` from runtime declarations; all other entries are stored as `void*`, which does **not** specify a callable signature. Names below classify the intended family, not a complete behavioral contract.
 
 ## Binding and lifecycle
 
@@ -12,7 +12,7 @@ runtime .so --dlopen(RTLD_NOW|RTLD_GLOBAL)--> required dlsym checks
                               loaded CJ libraries, then runtime dlsym
 ```
 
-`JitRuntimeBindings::LoadRequiredSymbols` fails initialization on a missing required address. Optional means not required **at initialization**, not safe to omit for every program: `GetName()` resolves on demand and returns an error if unavailable. `Resolve` searches loaded libraries through `FindCJSymbol`, then the runtime through `dlsym`, and caches successes. See `cangjit/src/JIT/X86_64/JitRuntimeBindings.cpp`, `LoadRuntime`, `LoadRequiredSymbols`, `Resolve`, and generated getters.
+`JitRuntimeBindings::LoadRequiredSymbols` fails initialization on a missing required address. Optional means not required **at initialization**, not safe to omit for every program: `GetName()` resolves on demand and returns an error if unavailable. `Resolve` searches loaded libraries through `FindCJSymbol`, then the runtime through `dlsym`, and caches successes. See `cangjit/src/JIT/Runtime/JitRuntimeBindings.cpp`, `LoadRuntime`, `LoadRequiredSymbols`, `Resolve`, and generated getters.
 
 ## Typed entries: required
 

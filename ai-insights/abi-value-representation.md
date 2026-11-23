@@ -27,7 +27,7 @@ value array:                                  value bytes   value bytes
 
 `MArray::GetElementSize` uses pointer size for a reference component, otherwise the component type's size. `BaseObject::ForEachRefField` traces array references individually and applies a struct component's GC bitmap per element, when the array type reports reference fields. Therefore an inline value can itself contain managed references; copying its bytes blindly can be inappropriate in a context requiring barriers. Conversely, an integer element is not made into a reference by its numeric bit pattern.
 
-The x86-64 JIT's `cangjit/src/JIT/X86_64/Compilers/Context/StringLiteralPool.cpp`, `StoreLiteral`, provides a concrete special case: it constructs pooled storage as `String {array, start, length}`, followed by `RawArray {type info, length, bytes}`. The code packs the start/length word and points the string at the embedded array. This is a literal-pool implementation, not evidence that all strings are separately allocated heap objects or that all values have object headers.
+The x86-64 JIT's `cangjit/src/JIT/Runtime/StringLiteralPool.cpp`, `StoreLiteral`, provides a concrete special case: it constructs pooled storage as `String {array, start, length}`, followed by `RawArray {type info, length, bytes}`. The code packs the start/length word and points the string at the embedded array. This is a literal-pool implementation, not evidence that all strings are separately allocated heap objects or that all values have object headers.
 
 ## References, values, and boxing
 

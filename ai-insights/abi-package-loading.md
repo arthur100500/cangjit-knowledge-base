@@ -23,7 +23,7 @@ FindCJSymbol(path, mangled_name) --> address, or null
 
 ## JIT package discovery and symbols
 
-`cangjit:src/JIT/X86_64/JitRuntimeBindings.cpp` (`PackageLibraryNames`, `FindPackageLibrary`, `EnsurePackage`, `Resolve`) implements these concrete candidate examples:
+`cangjit:src/JIT/Runtime/JitRuntimeBindings.cpp` (`PackageLibraryNames`, `FindPackageLibrary`, `EnsurePackage`, `Resolve`) implements these concrete candidate examples:
 
 | CHIR package | Candidate shared-library basenames, in order |
 | --- | --- |
@@ -33,7 +33,7 @@ FindCJSymbol(path, mangled_name) --> address, or null
 
 For each candidate it first accepts an already-tracked matching basename; otherwise it searches configured library search paths, the runtime library directory, import paths, the current directory, then colon-separated `LIBRARY_PATH`. It checks for regular files. This is the JIT's explicit search order, not a claim about the ELF loader's own dependency search or `LD_LIBRARY_PATH`. Failure to find a package returns `PackageLibraryNotFound`; failure to initialize a candidate returns `LibraryLoadFailed` rather than silently trying an unrelated fallback.
 
-Example external call: `cangjit:src/JIT/X86_64/Compilers/Expression/CompileApply.cpp` first calls `EnsurePackage(callee.GetPackageName())`, then resolves `callee.GetIdentifierWithoutPrefix()`; failure is `UnresolvedSymbol`. `Resolve` rejects empty and embedded-NUL names, checks its cache, asks `FindCJSymbol` for each tracked library in order, then tries `dlsym` on the runtime handle. Successful lookups are cached by name; lookup is not a generic demangling or overload-resolution facility. `cangjit:src/JIT/X86_64/RuntimeFunctions.inc` lists required initialization-time runtime exports and optional ones resolved as needed. A missing optional helper can still make the particular compilation requiring it fail.
+Example external call: `cangjit:src/JIT/X86_64/Compilers/Expression/CompileApply.cpp` first calls `EnsurePackage(callee.GetPackageName())`, then resolves `callee.GetIdentifierWithoutPrefix()`; failure is `UnresolvedSymbol`. `Resolve` rejects empty and embedded-NUL names, checks its cache, asks `FindCJSymbol` for each tracked library in order, then tries `dlsym` on the runtime handle. Successful lookups are cached by name; lookup is not a generic demangling or overload-resolution facility. `cangjit:src/JIT/Runtime/RuntimeFunctions.inc` lists required initialization-time runtime exports and optional ones resolved as needed. A missing optional helper can still make the particular compilation requiring it fail.
 
 ## Generated code publication and lifetime
 

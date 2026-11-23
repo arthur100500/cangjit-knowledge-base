@@ -18,7 +18,7 @@ The runtime source `runtime/src/ObjectManager.inline.h`, `NewObject`, and `runti
 
 `runtime/src/Heap/Allocator/Allocator.h` specifies an 8-byte allocation alignment and `HEADER_SIZE = 0` for an *additional allocator header*. This does **not** remove the managed `BaseObject` state word at the beginning of an object. Physical allocated bytes may include alignment/roundup and differ from logical payload or resident memory (`runtime/src/Heap/Heap.h`, size comments).
 
-The x86-64 JIT uses runtime bindings including `CJ_MCC_NewObject` (`cangjit/src/JIT/X86_64/RuntimeFunctions.inc`); `Compilers/Expression/CompileObject.cpp`, `CompileAllocation`, selects allocation helpers and records a safepoint. This evidence is for that JIT path, not a guarantee that native code always emits exactly the same sequence.
+The x86-64 JIT uses runtime bindings including `CJ_MCC_NewObject` (`cangjit/src/JIT/Runtime/RuntimeFunctions.inc`); `Compilers/Expression/CompileObject.cpp`, `CompileAllocation`, selects allocation helpers and records a safepoint. This evidence is for that JIT path, not a guarantee that native code always emits exactly the same sequence.
 
 ## Arrays and special allocations
 
