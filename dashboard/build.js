@@ -1,40 +1,58 @@
 'use strict';
 
-const http = require('node:http');
+// Builds the static dashboard site into dashboard/dist/ from the repository
+// content the former Node server used to expose live:
+//   data.json     — tasks from tasks.json plus a document index with titles
+//   classes.json  — class data from classes/classes.json
+//   docs/<path>   — every exposed Markdown file, at its repository-relative path
+//   ai-insights SVG illustrations, mirrored next to their documents
+// The client fetches these with relative URLs, so the bundle works under the
+// GitHub Pages project sub-path, a custom domain, or a local preview server.
+
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
+const dist = path.join(__dirname, 'dist');
 const documentRoots = {
   'ai-docs': 'knowledge',
-  'ai-insides': 'knowledge',
+  'ai-insights': 'knowledge',
   'ai-issues': 'issues',
   arch: 'decisions',
 };
 const sessionPath = 'unfinished/SESSION-STATE.md';
-const assets = {
-  '/': ['index.html', 'text/html; charset=utf-8'],
-  '/index.html': ['index.html', 'text/html; charset=utf-8'],
-  '/style.css': ['style.css', 'text/css; charset=utf-8'],
-  '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
-  '/cytoscape.min.js': ['node_modules/cytoscape/dist/cytoscape.min.js', 'text/javascript; charset=utf-8'],
-};
+// Each mirrored path segment must be URL-safe on any static host.
+const safeSegment = /^[A-Za-z0-9._-]+$/;
 
-function isWithin(parent, child) {
-  const relative = path.relative(parent, child);
-  return relative === '' || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative));
+function assertUrlSafe(relativePath) {
+  for (const segment of relativePath.split('/')) {
+    if (!safeSegment.test(segment)) {
+      throw new Error(`Path is not URL-safe: ${relativePath}`);
+    }
+  }
 }
 
 // Resolve both the allowed directory and the file so symlinks cannot escape it.
 async function readContained(directory, relativePath) {
   const realRoot = await fs.realpath(root);
   const realDirectory = await fs.realpath(directory);
-  if (!isWithin(realRoot, realDirectory)) return null;
+  const relative = path.relative(realRoot, realDirectory);
+  if (relative !== '' && (relative.startsWith(`..${path.sep}`) || relative === '..' || path.isAbsolute(relative))) return null;
   const resolved = await fs.realpath(path.join(directory, relativePath));
   if (!isWithin(realDirectory, resolved)) return null;
   const stat = await fs.stat(resolved);
   if (!stat.isFile()) return null;
   return fs.readFile(resolved, 'utf8');
+}
+
+function isWithin(parent, child) {
+  const relative = path.relative(parent, child);
+  return relative === '' || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative));
+}
+
+function titleFor(name, content) {
+  const heading = content.match(/^\s*#\s+(.+?)\s*#*\s*$/m);
+  return heading ? heading[1].trim() : path.posix.basename(name, '.md').replace(/[-_]/g, ' ');
 }
 
 function documentLocation(name) {
@@ -55,11 +73,6 @@ async function readDocument(name) {
     if (error.code === 'ENOENT' || error.code === 'ENOTDIR' || error.code === 'ELOOP') return null;
     throw error;
   }
-}
-
-function titleFor(name, content) {
-  const heading = content.match(/^\s*#\s+(.+?)\s*#*\s*$/m);
-  return heading ? heading[1].trim() : path.posix.basename(name, '.md').replace(/[-_]/g, ' ');
 }
 
 async function listDocuments() {
@@ -95,19 +108,6 @@ async function listDocuments() {
   }
   await add(sessionPath, 'knowledge');
   return documents.sort((a, b) => a.path.localeCompare(b.path));
-}
-
-function send(response, status, body, type) {
-  response.writeHead(status, {
-    'Content-Type': type,
-    'Cache-Control': 'no-store',
-    'X-Content-Type-Options': 'nosniff',
-  });
-  response.end(body);
-}
-
-function json(response, status, body) {
-  send(response, status, JSON.stringify(body), 'application/json; charset=utf-8');
 }
 
 function validateTasks(tasks) {
@@ -150,66 +150,65 @@ function validateClasses(data) {
   }
 }
 
-const server = http.createServer(async (request, response) => {
-  try {
-    if (request.method !== 'GET') {
-      response.setHeader('Allow', 'GET');
-      return json(response, 405, { error: 'Method not allowed' });
-    }
-    const url = new URL(request.url, 'http://localhost');
-    if (url.pathname === '/api/data') {
-      const tasksText = await readContained(root, 'tasks.json');
-      if (tasksText === null) throw new Error('Task data is unavailable');
-      const tasks = JSON.parse(tasksText);
-      validateTasks(tasks);
-      return json(response, 200, { tasks, documents: await listDocuments() });
-    }
-    if (url.pathname === '/api/classes') {
-      const text = await readContained(root, 'classes/classes.json');
-      if (text === null) throw new Error('Class data is unavailable');
-      const data = JSON.parse(text);
-      validateClasses(data);
-      return json(response, 200, data);
-    }
-    if (url.pathname === '/api/document') {
-      const name = url.searchParams.get('path');
-      const content = await readDocument(name);
-      if (content === null) return json(response, 404, { error: 'Document not found' });
-      return json(response, 200, { path: name, content });
-    }
-    if (url.pathname === '/api/insides-image') {
-      const name = url.searchParams.get('path');
-      const parts = typeof name === 'string' ? name.split('/') : [];
-      if (!parts.length || parts.some(part => !part || part === '.' || part === '..' || part.includes('\\') || part.includes('\0')) || !name.endsWith('.svg')) {
-        return json(response, 404, { error: 'Image not found' });
-      }
-      let content;
-      try {
-        content = await readContained(path.join(root, 'ai-insides'), name);
-      } catch (error) {
-        if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR' && error.code !== 'ELOOP') throw error;
-      }
-      if (content == null) return json(response, 404, { error: 'Image not found' });
-      response.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
-      return send(response, 200, content, 'image/svg+xml; charset=utf-8');
-    }
-    if (Object.hasOwn(assets, url.pathname)) {
-      const [name, type] = assets[url.pathname];
-      const content = await readContained(__dirname, name);
-      if (content !== null) return send(response, 200, content, type);
-    }
-    return json(response, 404, { error: 'Not found' });
-  } catch (error) {
-    console.error('Dashboard request failed:', error.message);
-    if (!response.headersSent) json(response, 500, { error: 'Internal server error' });
-    else response.destroy();
-  }
-});
-
-const port = process.env.PORT === undefined ? 3000 : Number(process.env.PORT);
-if (!Number.isInteger(port) || port < 1 || port > 65535) {
-  console.error('PORT must be an integer between 1 and 65535');
-  process.exitCode = 1;
-} else {
-  server.listen(port, '0.0.0.0', () => console.log(`Dashboard listening on 0.0.0.0:${port}`));
+async function writeDocument(relativePath, content) {
+  assertUrlSafe(relativePath);
+  const target = path.join(dist, relativePath);
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, content);
 }
+
+async function main() {
+  await fs.rm(dist, { recursive: true, force: true });
+  await fs.mkdir(dist, { recursive: true });
+
+  const tasksText = await fs.readFile(path.join(root, 'tasks.json'), 'utf8');
+  const tasks = JSON.parse(tasksText);
+  validateTasks(tasks);
+  const documents = await listDocuments();
+  await writeDocument('data.json', JSON.stringify({ tasks, documents }));
+
+  const classesText = await fs.readFile(path.join(root, 'classes/classes.json'), 'utf8');
+  const classesData = JSON.parse(classesText);
+  validateClasses(classesData);
+  await writeDocument('classes.json', JSON.stringify(classesData));
+
+  for (const document of documents) {
+    assertUrlSafe(document.path);
+    await writeDocument(path.join('docs', document.path), await readDocument(document.path));
+  }
+
+  // Mirror the SVG illustrations the dashboard can display. The client only
+  // shows images from ai-insights, so that is the only directory to carry over.
+  async function copySvg(directory, prefix) {
+    let entries;
+    try {
+      entries = await fs.readdir(directory, { withFileTypes: true });
+    } catch (error) {
+      if (error.code === 'ENOENT' || error.code === 'ENOTDIR') return;
+      throw error;
+    }
+    for (const entry of entries) {
+      if (entry.isDirectory()) await copySvg(path.join(directory, entry.name), `${prefix}/${entry.name}`);
+      else if (entry.isFile() && entry.name.endsWith('.svg')) {
+        await writeDocument(path.join('docs', `${prefix}/${entry.name}`), await fs.readFile(path.join(directory, entry.name), 'utf8'));
+      }
+    }
+  }
+  await copySvg(path.join(root, 'ai-insights'), 'ai-insights');
+
+  for (const [name, file] of [
+    ['index.html', 'index.html'],
+    ['style.css', 'style.css'],
+    ['app.js', 'app.js'],
+    ['cytoscape.min.js', path.join('node_modules', 'cytoscape', 'dist', 'cytoscape.min.js')],
+  ]) {
+    await writeDocument(name, await fs.readFile(path.join(__dirname, file), 'utf8'));
+  }
+
+  console.log(`Built dashboard: ${documents.length} documents, ${tasks.length} tasks, ${classesData.classes.length} classes`);
+}
+
+main().catch(error => {
+  console.error(`Dashboard build failed: ${error.message}`);
+  process.exitCode = 1;
+});

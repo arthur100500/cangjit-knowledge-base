@@ -178,8 +178,8 @@ async function loadArchitecture() {
   const status = document.getElementById('architecture-status');
   const list = document.getElementById('architecture-list');
   try {
-    const response = await fetch('/api/classes');
-    if (!response.ok) throw new Error(`Server returned ${response.status}`);
+    const response = await fetch('classes.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Request failed with ${response.status}`);
     const data = await response.json();
     state.classes = data.classes;
     if (!state.classes.length) {
@@ -357,19 +357,19 @@ function inline(parent, text, documentPath) {
       const parts = /^!\[([^\]]*)\]\(([^)]+)\)$/.exec(token);
       const imagePath = parts[2];
       const segments = imagePath.split('/');
-      if (documentPath.startsWith('ai-insides/') && imagePath.endsWith('.svg') &&
+      if (documentPath.startsWith('ai-insights/') && imagePath.endsWith('.svg') &&
           segments.every(part => part && part !== '.' && part !== '..' && !/[\\%?#:\s]/.test(part))) {
-        const directory = documentPath.slice('ai-insides/'.length, documentPath.lastIndexOf('/') + 1);
+        const directory = documentPath.slice('ai-insights/'.length, documentPath.lastIndexOf('/') + 1);
         const image = element('img');
         image.alt = parts[1];
-        image.src = `/api/insides-image?path=${encodeURIComponent(directory + imagePath)}`;
+        image.src = `docs/ai-insights/${directory + imagePath}`;
         parent.append(image);
       } else parent.append(document.createTextNode(token));
     } else if (token.startsWith('[')) {
       const parts = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(token);
       const target = parts[2];
       const segments = target.split('/');
-      if (documentPath.startsWith('ai-insides/') && target.endsWith('.md') &&
+      if (documentPath.startsWith('ai-insights/') && target.endsWith('.md') &&
           segments.every(part => part && part !== '.' && part !== '..' && !/[\\%?#:\s]/.test(part))) {
         const directory = documentPath.slice(0, documentPath.lastIndexOf('/') + 1);
         parent.append(button(parts[1], 'inline-link', () => showDocument(directory + target)));
@@ -466,11 +466,11 @@ async function showDocument(path) {
   showDetail('Document', doc?.title || path);
   detailContent.append(element('p', 'Loading document…'));
   try {
-    const response = await fetch(`/api/document?path=${encodeURIComponent(path)}`);
-    if (!response.ok) throw new Error(`Server returned ${response.status}`);
-    const data = await response.json();
+    const response = await fetch(`docs/${path}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Request failed with ${response.status}`);
+    const content = await response.text();
     if (request !== detailRequest) return;
-    detailContent.replaceChildren(element('p', data.path, 'document-path'), renderMarkdown(data.content, data.path));
+    detailContent.replaceChildren(element('p', path, 'document-path'), renderMarkdown(content, path));
   } catch (error) {
     if (request !== detailRequest) return;
     detailContent.replaceChildren(element('p', `Could not load document: ${error.message}`, 'notice error'));
@@ -479,8 +479,8 @@ async function showDocument(path) {
 
 async function load() {
   try {
-    const response = await fetch('/api/data');
-    if (!response.ok) throw new Error(`Server returned ${response.status}`);
+    const response = await fetch('data.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Request failed with ${response.status}`);
     const data = await response.json();
     state.tasks = Array.isArray(data.tasks) ? data.tasks : [];
     state.documents = Array.isArray(data.documents) ? data.documents : [];

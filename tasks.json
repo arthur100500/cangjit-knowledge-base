@@ -1044,7 +1044,15 @@
     "title": "Document runtime and ABI topics",
     "status": "done",
     "description": "Documented all 18 requested topics with source-backed examples and diagrams; checked the dashboard stack illustration and note links.",
-    "source": "ai-insides/abi-stack-frames.md",
+    "source": "ai-insights/abi-stack-frames.md",
+    "dependsOn": []
+  },
+  {
+    "id": "static-dashboard",
+    "title": "Publish the dashboard as a static site on GitHub Pages",
+    "status": "done",
+    "description": "Replaced the local Node server with a build step (dashboard/build.js) that mirrors exposed content into dashboard/dist/ and a Pages workflow; verified board, dependency graph, documents, SVG illustration and class graph under a Pages-like sub-path. Also renamed ai-insides/ to ai-insights/.",
+    "source": "arch/knowledge-dashboard.md",
     "dependsOn": []
   }
 ]

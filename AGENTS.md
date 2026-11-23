@@ -17,7 +17,7 @@ The knowledge base is a sibling checkout of the code repository:
 1. Read the cangjit `AGENTS.md`.
 2. In the knowledge base, run `git pull --rebase` to obtain knowledge from
    the user's other machines.
-3. Skim `arch/` and `ai-insides/` for current decisions and known quirks
+3. Skim `arch/` and `ai-insights/` for current decisions and known quirks
    before touching code.
 4. Check `ai-issues/` for open P0/P1 items affecting the area of work.
 
@@ -26,11 +26,11 @@ The knowledge base is a sibling checkout of the code repository:
 | Folder    | Contents                                                                 | Format              |
 |-----------|--------------------------------------------------------------------------|---------------------|
 | `ai-docs/`   | Information the user explicitly asked an agent to scout for (research results, investigations, answers). | Markdown (`.md`) |
-| `ai-insides/`| Information agents acquired that is needed for project understanding (how things work, gotchas, environment quirks). | Any format        |
+| `ai-insights/`| Information agents acquired that is needed for project understanding (how things work, gotchas, environment quirks). | Any format        |
 | `ai-issues/` | Proposals and issues — each with a name, priority, and brief description. | Markdown (`.md`) |
 | `arch/`      | Architecture designs and decisions that were taken.                      | Markdown (`.md`) |
 | `tasks.json` | Dashboard tasks, statuses, sources and dependencies. | JSON |
-| `dashboard/` | Read-only LAN dashboard for this knowledge base. | JavaScript, HTML, CSS |
+| `dashboard/` | Static dashboard for this knowledge base, built to `dist/` and published to GitHub Pages. | JavaScript, HTML, CSS |
 
 ## Rules per folder
 
@@ -42,7 +42,7 @@ The knowledge base is a sibling checkout of the code repository:
 * Written when the user asks an agent to scout/research something — before or
   after the answer is given in chat, but always before the session ends.
 
-### `ai-insides/` — project-understanding notes
+### `ai-insights/` — project-understanding notes
 
 * Anything an agent had to figure out to do its job that is not already
   obvious from the cangjit source: build quirks, invariants, pipeline
@@ -106,7 +106,7 @@ in a batch at session end:
 * User-requested scouting or research → `ai-docs/<topic>.md`, including when
   the answer was already given in chat.
 * Non-obvious project behavior, build quirks, invariants, or debugging
-  recipes → append to `ai-insides/`.
+  recipes → append to `ai-insights/`.
 * A bug or proposal → create or update an `ai-issues/` file. Gate rejections
   usually deserve an issue or an update to an existing one.
 * An architecture decision, including Gate 1/2 acceptance or an explicit
