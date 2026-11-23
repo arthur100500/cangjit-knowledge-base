@@ -44,7 +44,6 @@ Review each file below individually. Absence of a FIX comment is only an inferen
 - [TODO] `src/JIT/X86_64/Location.h` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/InterferenceGraph.cpp` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/InterferenceGraph.h` — review status inferred from absence of FIX
-- [TODO] `src/JIT/X86_64/RegisterAllocation/InterferenceGraphBuilder.h` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/LivenessInterferenceGraphBuilder.cpp` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/LivenessInterferenceGraphBuilder.h` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/LocalFinalizerFrontier.cpp` — review status inferred from absence of FIX
@@ -54,8 +53,6 @@ Review each file below individually. Absence of a FIX comment is only an inferen
 - [TODO] `src/JIT/X86_64/RegisterAllocation/RegisterAllocator.h` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/SafepointLiveness.cpp` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/SafepointLiveness.h` — review status inferred from absence of FIX
-- [TODO] `src/JIT/X86_64/RegisterAllocation/SimpleInterferenceGraphBuilder.cpp` — review status inferred from absence of FIX
-- [TODO] `src/JIT/X86_64/RegisterAllocation/SimpleInterferenceGraphBuilder.h` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/TrivialStackRegalloc.cpp` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/TrivialStackRegalloc.h` — review status inferred from absence of FIX
 - [TODO] `src/JIT/X86_64/RegisterAllocation/ValueNumeration.cpp` — review status inferred from absence of FIX

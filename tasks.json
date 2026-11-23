@@ -1054,5 +1054,45 @@
     "description": "Replaced the local Node server with a build step (dashboard/build.js) that mirrors exposed content into dashboard/dist/ and a Pages workflow; verified board, dependency graph, documents, SVG illustration and class graph under a Pages-like sub-path. Also renamed ai-insides/ to ai-insights/.",
     "source": "arch/knowledge-dashboard.md",
     "dependsOn": []
+  },
+  {
+    "id": "jit-unused-interference-graph",
+    "title": "[REFACTOR] Avoid unused interference-graph construction",
+    "status": "icebox",
+    "description": "The stack allocator checks the graph's size but does not use its edges; decide whether to defer graph construction or introduce an allocator that consumes it.",
+    "source": "ai-issues/060-jit-unused-interference-graph.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-repeated-safepoint-analysis",
+    "title": "[REFACTOR] Reuse safepoint initialization analysis",
+    "status": "icebox",
+    "description": "CFG, reachability and must-initialization are recomputed for each safepoint; preserve exceptional-edge and temporary-root semantics when sharing them.",
+    "source": "ai-issues/061-jit-repeated-safepoint-analysis.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-call-lowering-duplication",
+    "title": "[REFACTOR] Share common call-lowering steps",
+    "status": "icebox",
+    "description": "Direct and virtual calls duplicate argument and result handling but differ in scratch layouts and error semantics; add targeted coverage before sharing.",
+    "source": "ai-issues/062-jit-call-lowering-duplication.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-safepoint-provenance-refactor",
+    "title": "[REFACTOR] Separate safepoint reference provenance",
+    "status": "icebox",
+    "description": "The recursive classifier combines managed, stack-local and derived root handling; add GC and exceptional-edge coverage before separating it.",
+    "source": "ai-issues/063-jit-safepoint-provenance-refactor.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-trivial-cleanup",
+    "title": "[REFACTOR] Remove JIT dead code and simplify compilation",
+    "status": "done",
+    "description": "Removed unused graph and location code, shared incoming argument offsets, extracted focused compilation and safepoint helpers, and verified JIT regressions plus local finalizers and imported globals.",
+    "source": "arch/jit-liveness.md",
+    "dependsOn": []
   }
 ]
