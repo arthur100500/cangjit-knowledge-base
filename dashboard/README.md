@@ -21,7 +21,7 @@ The Architecture section uses Cytoscape.js, built into `dist/` from the pinned d
 
 Markdown documents in `ai-insights/` can include local SVG illustrations, for example `![Stack frame](abi-stack-frame.svg)` in `ai-insights/abi-stack-frames.md`. Paths are relative to the Markdown file and may name files in subdirectories; they must stay within `ai-insights/`, use the lowercase `.svg` extension, and contain no `.` or `..` path components, URL escapes, query strings, or fragments. Other image paths are displayed as text. The dashboard displays SVG as an image rather than inline HTML, so scripts inside an SVG do not execute. Relative Markdown links between `ai-insights/` documents open the referenced document in the dashboard.
 
-Only Markdown under `ai-docs/`, `ai-insights/`, `ai-issues/`, and `arch/`, plus `unfinished/SESSION-STATE.md`, is mirrored into the site, along with `tasks.json` and `classes/classes.json` data. Everything the site serves is public on GitHub Pages; the repository is public, so no non-public content may be added to the build.
+Only Markdown under `ai-docs/`, `ai-insights/`, `ai-issues/`, and `arch/` is mirrored into the site, along with `tasks.json` and `classes/classes.json` data. Everything the site serves is public on GitHub Pages; the repository is public, so no non-public content may be added to the build.
 
 ## One-time setup
 

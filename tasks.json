@@ -3,1104 +3,152 @@
     "id": "jit-state-assertions",
     "title": "Assert internal JIT state invariants",
     "status": "done",
-    "description": "Added assertions for proven internal JIT invariants with release-safe failure paths. Debug build, numbered examples 01–10 and a floating-point smoke passed.",
+    "description": "Assertions for proven internal JIT invariants with release-safe failure paths. Debug build, numbered examples 01-10 and a floating-point smoke passed.",
     "source": "ai-docs/jit-state-assertion-scout.md",
-    "dependsOn": []
-  },
-  {
-    "id": "package-typeinfo",
-    "title": "Support JIT-defined package TypeInfo",
-    "status": "icebox",
-    "description": "JIT-defined package type metadata is not yet available; do not substitute fabricated metadata.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": []
-  },
-  {
-    "id": "package-globals",
-    "title": "Support package-local globals and initialization",
-    "status": "icebox",
-    "description": "Package-local storage and initialization are unavailable. Preinitialization needs loader metadata and managed global references need GC static roots.",
-    "source": "unfinished/SESSION-STATE.md",
     "dependsOn": []
   },
   {
     "id": "local-finalizers",
     "title": "Implement local finalizer lifetime handling",
     "status": "icebox",
-    "description": "Registration and frontier cleanup are committed and match native on straight-line, branch, loop, interface and mutable stack aliases, failed allocation, exceptions, finalizer ordering and GC. Resume with escaped-address and uncommon exceptional-edge coverage; deep stack-growth failure is tracked separately.",
-    "source": "unfinished/SESSION-STATE.md",
+    "description": "Registration and frontier cleanup committed (cangjit 676c60de), matches native on straight-line, branch, loop, interface, mutable stack aliases, failed allocation, exceptions, ordering, GC in finalizers. Unverified: escaped addresses, uncommon exceptional edges.",
+    "source": "ai-issues/055-jit-local-finalizer-edges.md",
     "dependsOn": []
   },
   {
     "id": "jit-stack-overflow-crash",
     "title": "Fix JIT stack-overflow crash",
     "status": "icebox",
-    "description": "A 3,000-deep recursive JIT run with a live local alias segfaulted in runtime stack growth while native returned 42. Isolate the trigger and repair stack growth/overflow handling; the 100-deep case matched.",
+    "description": "3,000-deep recursive JIT run with a live local alias segfaults in runtime stack growth; native returns 42. Cause not isolated.",
     "source": "ai-issues/001-jit-stack-overflow.md",
+    "dependsOn": []
+  },
+  {
+    "id": "package-typeinfo",
+    "title": "Support JIT-defined package TypeInfo",
+    "status": "icebox",
+    "description": "JIT-defined package type metadata unavailable; do not substitute fabricated metadata.",
+    "source": "ai-issues/052-jit-defined-typeinfo.md",
+    "dependsOn": []
+  },
+  {
+    "id": "package-globals",
+    "title": "Support package-local globals and initialization",
+    "status": "icebox",
+    "description": "Package-local storage and initialization unavailable. Needs loader metadata, GC static roots.",
+    "source": "ai-issues/053-jit-package-globals.md",
+    "dependsOn": []
+  },
+  {
+    "id": "aggregate-generic-abi",
+    "title": "Implement aggregate and generic-value ABI",
+    "status": "icebox",
+    "description": "Generic values and aggregate arguments/returns need addressable storage, indirect returns, GC maps; current scalar representation rejects them.",
+    "source": "ai-issues/054-jit-aggregate-and-generic-abi.md",
+    "dependsOn": []
+  },
+  {
+    "id": "finalizer-edges",
+    "title": "Verify local-finalizer exceptional and escaped-address paths",
+    "status": "icebox",
+    "description": "Failed-allocation merge, escaped slot addresses, shared landing pads, finalizers triggering GC not exercised.",
+    "source": "ai-issues/055-jit-local-finalizer-edges.md",
+    "dependsOn": []
+  },
+  {
+    "id": "autoenv-this",
+    "title": "Support dynamic auto-environment metadata and nested This",
+    "status": "icebox",
+    "description": "Runtime-generic auto-environments rejected; This type-argument recognition must be consistent across TypeInfo construction, staging and allocation.",
+    "source": "ai-issues/056-jit-autoenv-and-this.md",
+    "dependsOn": []
+  },
+  {
+    "id": "native-outer-typeinfo-crash",
+    "title": "Fix native executable outer-TypeInfo dispatch across packages",
+    "status": "icebox",
+    "description": "Native executable calling generic interface impl in shared library crashes: hidden outer TypeInfo argument null (NeedOuterTypeInfo in CGPkgContext.cpp).",
+    "source": "ai-issues/057-native-outer-typeinfo-crash.md",
+    "dependsOn": []
+  },
+  {
+    "id": "float-remaining",
+    "title": "Complete floating-point operations",
+    "status": "icebox",
+    "description": "Float16 arithmetic, floating remainder and int<->float conversions remain unsupported.",
+    "source": "ai-issues/058-jit-remaining-float-operations.md",
+    "dependsOn": []
+  },
+  {
+    "id": "explicit-library-names",
+    "title": "Resolve explicitly named native package libraries",
+    "status": "icebox",
+    "description": "Compiler -l list not passed to JIT; package libraries with nonstandard filenames may be missed.",
+    "source": "ai-issues/059-jit-explicit-library-names.md",
+    "dependsOn": []
+  },
+  {
+    "id": "smoke-failures",
+    "title": "Investigate expanded native/JIT smoke failures",
+    "status": "icebox",
+    "description": "Exception operand location, float call return type, generic call unsupported during lazy compilation; no pre-refactor baseline.",
+    "source": "ai-issues/051-jit-refactor-smoke-failures.md",
+    "dependsOn": []
+  },
+  {
+    "id": "source-review",
+    "title": "Review remaining JIT source files",
+    "status": "icebox",
+    "description": "File-by-file review checklist; FunctionContext.cpp explicitly not yet user-reviewed, CompileFunction.cpp requested for re-review.",
+    "source": "ai-issues/050-jit-source-review.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-unused-interference-graph",
+    "title": "Avoid unused interference-graph construction",
+    "status": "icebox",
+    "description": "TrivialStackRegalloc uses the liveness interference graph only to assert node count.",
+    "source": "ai-issues/060-jit-unused-interference-graph.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-repeated-safepoint-analysis",
+    "title": "Reuse safepoint initialization analysis",
+    "status": "icebox",
+    "description": "CFG, reachability and must-initialization fixed point rebuilt per safepoint; compute once per function.",
+    "source": "ai-issues/061-jit-repeated-safepoint-analysis.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-call-lowering-duplication",
+    "title": "Share common call-lowering steps",
+    "status": "icebox",
+    "description": "CompileApply and CompileInvoke duplicate argument placement, TypeInfo staging, result stores, exceptional continuations.",
+    "source": "ai-issues/062-jit-call-lowering-duplication.md",
+    "dependsOn": []
+  },
+  {
+    "id": "jit-safepoint-provenance-refactor",
+    "title": "Separate safepoint reference provenance",
+    "status": "icebox",
+    "description": "Large recursive classifier in ComputeSafepointLiveness; extract with GC and exceptional-edge coverage first.",
+    "source": "ai-issues/063-jit-safepoint-provenance-refactor.md",
+    "dependsOn": []
+  },
+  {
+    "id": "compiler-push",
+    "title": "Push cangjit compiler commits",
+    "status": "icebox",
+    "description": "GitHub denied SSH identity arthur100500 access to arthur-alekseev-itmo/cangjit.git; pushes repeatedly failed.",
+    "source": "unfinished/SESSION-STATE.md (deleted)",
     "dependsOn": []
   },
   {
     "id": "external-packages",
     "title": "Resolve arbitrary external package discovery",
     "status": "icebox",
-    "description": "External package discovery remains unresolved; missing runtime metadata must not be fabricated.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": []
-  },
-  {
-    "id": "dispatch-abi-coverage",
-    "title": "Verify auto-environment dispatch and aggregate ABI",
-    "status": "icebox",
-    "description": "Interface, class and static interface dispatch have been exercised; auto-environment dispatch and aggregate ABI have not.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": []
-  },
-  {
-    "id": "nested-this",
-    "title": "Investigate nested This in generated CHIR type arguments",
-    "status": "icebox",
-    "description": "Source syntax rejects nested This in type arguments; whether generated CHIR can contain it remains unverified.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": []
-  },
-  {
-    "id": "managed-startup",
-    "title": "Run main through managed startup without a sidecar",
-    "status": "done",
-    "description": "The unused sidecar requirement was removed and managed startup runs main.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": []
-  },
-  {
-    "id": "checked-arithmetic",
-    "title": "Match native checked-arithmetic exceptions",
-    "status": "done",
-    "description": "Checked arithmetic uses the native exception factory and exact messages; normal and exceptional cases were exercised.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": []
-  },
-  {
-    "id": "exception-unwinding",
-    "title": "Support typed exceptions and unwinding",
-    "status": "done",
-    "description": "Standard exception construction, typed catches, cross-frame unwinding and finally paths have been exercised against native execution; JIT-defined exception TypeInfo remains a separate task.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": [
-      "managed-startup"
-    ]
-  },
-  {
-    "id": "generic-typeinfo",
-    "title": "Construct and forward native generic TypeInfo",
-    "status": "done",
-    "description": "Concrete and dynamic TypeInfos, outer generic parameters, nested arrays, tuples and closures are supported. Native/JIT comparisons covered identity and positive/negative type checks.",
-    "source": "arch/jit-object-allocation.md",
-    "dependsOn": [
-      "managed-startup"
-    ]
-  },
-  {
-    "id": "virtual-dispatch",
-    "title": "Support native class and interface dispatch",
-    "status": "done",
-    "description": "Class, interface and static-interface dispatch, including generic introducing types and exceptional calls, were exercised. Auto-environment and aggregate ABI coverage remains separate.",
-    "source": "arch/jit-object-allocation.md",
-    "dependsOn": [
-      "generic-typeinfo"
-    ]
-  },
-  {
-    "id": "generic-allocation",
-    "title": "Allocate native generic classes",
-    "status": "done",
-    "description": "Concrete and dynamic class allocations use runtime TypeInfo sizes. Bool and tuple instantiations survived explicit heavy GC in native/JIT comparisons.",
-    "source": "arch/jit-object-allocation.md",
-    "dependsOn": [
-      "generic-typeinfo"
-    ]
-  },
-  {
-    "id": "compiler-push",
-    "title": "Push cangjit compiler commits",
-    "status": "icebox",
-    "description": "Blocked: GitHub denied SSH identity arthur100500 access to arthur-alekseev-itmo/cangjit.git. Committed compiler work is backed up as ordered patches in unfinished/ and pushed to the knowledge-base repository.",
-    "source": "unfinished/SESSION-STATE.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-002",
-    "title": "[REFACTOR] Split Build into validation, stack-map, exception and descriptor encoding helpers",
-    "status": "done",
-    "description": "Split Build into validation, stack-map, exception and descriptor encoding helpers; preserve binary format and errors.",
-    "source": "ai-issues/002-jit-review-002.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-003",
-    "title": "[REFACTOR] Document the descriptor and example concisely",
-    "status": "done",
-    "description": "Document the descriptor and example concisely; see ai-docs/jit-metadata-layout.md.",
-    "source": "ai-issues/003-jit-review-003.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-004",
-    "title": "[REFACTOR] Replace Roots pair with named register-mask and slot fields",
-    "status": "done",
-    "description": "Replace Roots pair with named register-mask and slot fields; migrate users.",
-    "source": "ai-issues/004-jit-review-004.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-005",
-    "title": "[REFACTOR] Replace ambiguous variant/pair Result with a named result and fields",
-    "status": "done",
-    "description": "Replace ambiguous variant/pair Result with a named result and fields; preserve diagnostics.",
-    "source": "ai-issues/005-jit-review-005.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-006",
-    "title": "[REFACTOR] Compare eager typed runtime fields against on-demand lookup for package-dependent symbols",
-    "status": "icebox",
-    "description": "Compare eager typed runtime fields against on-demand lookup for package-dependent symbols; keep shutdown and loading semantics.",
-    "source": "ai-issues/006-jit-review-006.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-007",
-    "title": "[REFACTOR] Extract initialization stages with named helpers and preserve rollback",
-    "status": "done",
-    "description": "Extract initialization stages with named helpers and preserve rollback.",
-    "source": "ai-issues/007-jit-review-007.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-008",
-    "title": "[REFACTOR] Compare typed return errors against exceptions for eager initialization, including rollback and caller contracts",
-    "status": "icebox",
-    "description": "Compare typed return errors against exceptions for eager initialization, including rollback and caller contracts; do not assume exceptions are better.",
-    "source": "ai-issues/008-jit-review-008.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-009",
-    "title": "[REFACTOR] Name repeated diagnostic literals without changing messages or ownership",
-    "status": "done",
-    "description": "Name repeated diagnostic literals without changing messages or ownership.",
-    "source": "ai-issues/009-jit-review-009.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-010",
-    "title": "[REFACTOR] Explain the runtime mode assertion and metadata columns",
-    "status": "done",
-    "description": "Explain the runtime mode assertion and metadata columns; see ai-docs/jit-metadata-layout.md.",
-    "source": "ai-issues/010-jit-review-010.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-011",
-    "title": "[REFACTOR] Extract library path/basename validation, preserving duplicate and error behavior",
-    "status": "done",
-    "description": "Extract library path/basename validation, preserving duplicate and error behavior.",
-    "source": "ai-issues/011-jit-review-011.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-012",
-    "title": "[REFACTOR] Extract runtime directory derivation",
-    "status": "done",
-    "description": "Extract runtime directory derivation; consider the existing path utility semantics.",
-    "source": "ai-issues/012-jit-review-012.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-013",
-    "title": "[REFACTOR] Extract binding, runtime initialization and library loading stages while retaining exception-safe shutdown",
-    "status": "done",
-    "description": "Extract binding, runtime initialization and library loading stages while retaining exception-safe shutdown.",
-    "source": "ai-issues/013-jit-review-013.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-014",
-    "title": "[REFACTOR] Name package prefix and library naming literals consistently without changing paths",
-    "status": "done",
-    "description": "Name package prefix and library naming literals consistently without changing paths.",
-    "source": "ai-issues/014-jit-review-014.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-015",
-    "title": "[REFACTOR] Compare FileUtil::JoinPath and GetDirPath with current POSIX behavior",
-    "status": "done",
-    "description": "Compare FileUtil::JoinPath and GetDirPath with current POSIX behavior; see ai-docs/jit-review-questions.md.",
-    "source": "ai-issues/015-jit-review-015.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-016",
-    "title": "[REFACTOR] If typed runtime fields replace public lookup, make Resolve private only after migrating all dynamic lookup callers",
-    "status": "icebox",
-    "description": "If typed runtime fields replace public lookup, make Resolve private only after migrating all dynamic lookup callers.",
-    "source": "ai-issues/016-jit-review-016.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-017",
-    "title": "[REFACTOR] Evaluate one typed result abstraction against existing variants and outward error messages",
-    "status": "icebox",
-    "description": "Result<T, Err> now exists and runtime Close uses it; migrate the remaining compilation, initialization and symbol-lookup result types.",
-    "source": "ai-issues/017-jit-review-017.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-018",
-    "title": "[REFACTOR] Replace RuntimeConfig tuple with a named field struct and migrate all callers",
-    "status": "done",
-    "description": "Replace RuntimeConfig tuple with a named field struct and migrate all callers.",
-    "source": "ai-issues/018-jit-review-018.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-019",
-    "title": "[REFACTOR] Evaluate replacing SymbolResult variant with an explicit result entity",
-    "status": "icebox",
-    "description": "Evaluate replacing SymbolResult variant with an explicit result entity; retain error details.",
-    "source": "ai-issues/019-jit-review-019.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-020",
-    "title": "[REFACTOR] Introduce typed binding error categories without losing loader diagnostics",
-    "status": "icebox",
-    "description": "Introduce typed binding error categories without losing loader diagnostics.",
-    "source": "ai-issues/020-jit-review-020.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-021",
-    "title": "[REFACTOR] Move ParameterPlacement to the calling convention ownership boundary and migrate includes",
-    "status": "done",
-    "description": "Move ParameterPlacement to the calling convention ownership boundary and migrate includes.",
-    "source": "ai-issues/021-jit-review-021.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-022",
-    "title": "[REFACTOR] Compare existing JitFailureKind with outward CompilationError",
-    "status": "done",
-    "description": "Compare existing JitFailureKind with outward CompilationError; see ai-docs/jit-review-questions.md.",
-    "source": "ai-issues/022-jit-review-022.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-023",
-    "title": "[REFACTOR] Move runtime setup to runtime loading ownership",
-    "status": "icebox",
-    "description": "Explicit Close and fail-fast destructor are implemented in the current owner; move runtime setup and ownership to the agreed JitRuntime factory.",
-    "source": "ai-issues/023-jit-review-023.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-024",
-    "title": "[REFACTOR] Rename CompileUserMain to reflect execution or return compilation result and separate invocation",
-    "status": "done",
-    "description": "Rename CompileUserMain to reflect execution or return compilation result and separate invocation; migrate callers.",
-    "source": "ai-issues/024-jit-review-024.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-025",
-    "title": "[REFACTOR] Move runtime-symbol resolution/reporting to RuntimeBindings or a suitable typed boundary",
-    "status": "icebox",
-    "description": "Move runtime-symbol resolution/reporting to RuntimeBindings or a suitable typed boundary.",
-    "source": "ai-issues/025-jit-review-025.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-026",
-    "title": "[REFACTOR] Compare eager typed fields with dynamic lookup",
-    "status": "icebox",
-    "description": "Compare eager typed fields with dynamic lookup; retain support for symbols discovered from loaded packages.",
-    "source": "ai-issues/026-jit-review-026.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-027",
-    "title": "[REFACTOR] Typed function pointers avoid repeated casts but do not remove dlsym conversion",
-    "status": "done",
-    "description": "Typed function pointers avoid repeated casts but do not remove dlsym conversion; see ai-docs/jit-review-questions.md.",
-    "source": "ai-issues/027-jit-review-027.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-028",
-    "title": "[REFACTOR] Remove stale duplicate header after confirming includes/build",
-    "status": "done",
-    "description": "Remove stale duplicate header after confirming includes/build; explanation in ai-docs/jit-review-questions.md.",
-    "source": "ai-issues/028-jit-review-028.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-029",
-    "title": "[REFACTOR] Explicitly mark this file not yet user-reviewed",
-    "status": "done",
-    "description": "Explicitly mark this file not yet user-reviewed; see review task and separately track template refactors.",
-    "source": "ai-issues/029-jit-review-029.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-030",
-    "title": "[REFACTOR] Extract cohesive helpers from PrepareTypeTemplate",
-    "status": "done",
-    "description": "Extract cohesive helpers from PrepareTypeTemplate; preserve template names and failure behavior.",
-    "source": "ai-issues/030-jit-review-030.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-031",
-    "title": "[REFACTOR] Reduce PrepareTypeTemplate nesting with guard clauses and helpers",
-    "status": "done",
-    "description": "Reduce PrepareTypeTemplate nesting with guard clauses and helpers; preserve closure and generic handling.",
-    "source": "ai-issues/031-jit-review-031.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-032",
-    "title": "[REFACTOR] Add at most two lines describing FunctionContext and its ownership",
-    "status": "done",
-    "description": "Add at most two lines describing FunctionContext and its ownership.",
-    "source": "ai-issues/032-jit-review-032.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-033",
-    "title": "[REFACTOR] Propose focused owners for type info and finalizer logic, leaving context as state/accessors and preserving lifetime/error propagation",
-    "status": "icebox",
-    "description": "Propose focused owners for type info and finalizer logic, leaving context as state/accessors and preserving lifetime/error propagation.",
-    "source": "ai-issues/033-jit-review-033.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-034",
-    "title": "[REFACTOR] Keep small label generation/storage helpers in FunctionContext",
-    "status": "done",
-    "description": "Keep small label generation/storage helpers in FunctionContext; this comment accepts them and asks for no refactor.",
-    "source": "ai-issues/034-jit-review-034.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-035",
-    "title": "[REFACTOR] Consider initializing runtime before context creation versus explicit ownership",
-    "status": "icebox",
-    "description": "Consider initializing runtime before context creation versus explicit ownership; preserve rollback and destruction order.",
-    "source": "ai-issues/035-jit-review-035.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-036",
-    "title": "[REFACTOR] Remove package-local outer-TypeInfo analysis",
-    "status": "done",
-    "description": "Removed the JIT subtype graph; ordinary virtual calls use conservative runtime outer-TypeInfo lookup, as native library mode does.",
-    "source": "ai-issues/036-jit-review-036.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-037",
-    "title": "[REFACTOR] Explain subtype traversal and cache",
-    "status": "done",
-    "description": "Documented the former analysis and verified precompiled generic implementations; native executable mode has a separate counterexample.",
-    "source": "ai-issues/037-jit-review-037.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-038",
-    "title": "[REFACTOR] Reduce subtype traversal nesting via helper/guard clauses without changing recursive logic",
-    "status": "done",
-    "description": "Reduce subtype traversal nesting via helper/guard clauses without changing recursive logic.",
-    "source": "ai-issues/038-jit-review-038.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-039",
-    "title": "[REFACTOR] Extract StringLiteralPool",
-    "status": "done",
-    "description": "Extracted a deduplicating string pool with stable addresses and a lifetime exceeding the JIT allocator; arithmetic exception messages use it.",
-    "source": "ai-issues/039-jit-review-039.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-040",
-    "title": "[REFACTOR] Remove unsupported-platform preprocessor guard as requested, assuming Linux x86-64 build targeting",
-    "status": "done",
-    "description": "Remove unsupported-platform preprocessor guard as requested, assuming Linux x86-64 build targeting; assess build configuration.",
-    "source": "ai-issues/040-jit-review-040.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-041",
-    "title": "[REFACTOR] Explain frame and metadata publication",
-    "status": "done",
-    "description": "Explain frame and metadata publication; see ai-docs/jit-function-frame-and-metadata.md.",
-    "source": "ai-issues/041-jit-review-041.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-042",
-    "title": "[REFACTOR] Extract epilogue return-value saving into a named helper preserving unsupported-type errors",
-    "status": "done",
-    "description": "Extract epilogue return-value saving into a named helper preserving unsupported-type errors.",
-    "source": "ai-issues/042-jit-review-042.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-043",
-    "title": "[REFACTOR] Extract ABI return-value loading and normalization into suitable utility/helper without changing types",
-    "status": "done",
-    "description": "Extract ABI return-value loading and normalization into suitable utility/helper without changing types.",
-    "source": "ai-issues/043-jit-review-043.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-044",
-    "title": "[REFACTOR] Split Compile into cohesive private helpers and retain explicit user re-review task",
-    "status": "done",
-    "description": "Split Compile into cohesive private helpers and retain explicit user re-review task.",
-    "source": "ai-issues/044-jit-review-044.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-045",
-    "title": "[REFACTOR] Extract ABI argument spilling and explain normalization and stack placements",
-    "status": "done",
-    "description": "Extract ABI argument spilling and explain normalization and stack placements; see ai-docs/jit-function-frame-and-metadata.md.",
-    "source": "ai-issues/045-jit-review-045.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-046",
-    "title": "[REFACTOR] Extract hidden TypeInfo argument saving and document generic, outer and this slots",
-    "status": "done",
-    "description": "Extract hidden TypeInfo argument saving and document generic, outer and this slots; see ai-docs/jit-function-frame-and-metadata.md.",
-    "source": "ai-issues/046-jit-review-046.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-047",
-    "title": "[REFACTOR] Document each pure assembler emitter, including save and restore pseudo-C where applicable",
-    "status": "done",
-    "description": "Document each pure assembler emitter, including save and restore pseudo-C where applicable; see ai-docs/jit-function-stub.md.",
-    "source": "ai-issues/047-jit-review-047.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-048",
-    "title": "[REFACTOR] Document lazy stub behavior with pseudocode",
-    "status": "done",
-    "description": "Document lazy stub behavior with pseudocode; see ai-docs/jit-function-stub.md.",
-    "source": "ai-issues/048-jit-review-048.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-049",
-    "title": "[REFACTOR] Explain allocation base versus entry pointer and release semantics",
-    "status": "done",
-    "description": "Explain allocation base versus entry pointer and release semantics; see ai-docs/jit-function-stub.md.",
-    "source": "ai-issues/049-jit-review-049.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-001",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Context/FunctionContext.cpp",
-    "status": "icebox",
-    "description": "Explicitly not yet user-reviewed.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-002",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Context/JitFailure.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-003",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileApply.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-004",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileApply.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-005",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileBinaryExpression.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-006",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileBinaryExpression.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-007",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileBranch.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-008",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileBranch.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-009",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileConstant.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-010",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileConstant.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-011",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileDebug.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-012",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileDebug.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-013",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileExit.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-014",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileExit.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-015",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileGoTo.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-016",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileGoTo.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-017",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileInvoke.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-018",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileInvoke.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-019",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileNumericCast.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-020",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileNumericCast.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-021",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileObject.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-022",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileObject.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-023",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileUnaryExpression.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-024",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Expression/CompileUnaryExpression.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-025",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Function/CompileBlock.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-026",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Function/CompileBlock.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-027",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Function/CompileFunction.cpp",
-    "status": "icebox",
-    "description": "User-requested re-review.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-028",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Function/CompileFunction.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-029",
-    "title": "[TODO] Review src/JIT/X86_64/Compilers/Function/CompileFunctionStub.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-030",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/FunctionRecord.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-031",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/FunctionRecord.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-032",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/FunctionRegistry.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-033",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/FunctionRegistry.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-034",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/FunctionResolver.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-035",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/FunctionResolver.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-036",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/LazyCallSiteRegistry.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-037",
-    "title": "[TODO] Review src/JIT/X86_64/LazyCalls/LazyCallSiteRegistry.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-038",
-    "title": "[TODO] Review src/JIT/X86_64/Location.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-039",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/InterferenceGraph.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-040",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/InterferenceGraph.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-041",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/InterferenceGraphBuilder.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-042",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/LivenessInterferenceGraphBuilder.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-043",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/LivenessInterferenceGraphBuilder.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-044",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/LocalFinalizerFrontier.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-045",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/LocalFinalizerFrontier.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-046",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/RegisterAllocation.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-047",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/RegisterAllocation.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-048",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/RegisterAllocator.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-049",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/SafepointLiveness.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-050",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/SafepointLiveness.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-051",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/SimpleInterferenceGraphBuilder.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-052",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/SimpleInterferenceGraphBuilder.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-053",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/TrivialStackRegalloc.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-054",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/TrivialStackRegalloc.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-055",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/ValueNumeration.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-056",
-    "title": "[TODO] Review src/JIT/X86_64/RegisterAllocation/ValueNumeration.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-057",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/MemoryUtils.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-058",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/MemoryUtils.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-059",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/RegisterUtils.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-060",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/RegisterUtils.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-061",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/StackFrameUtils.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-062",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/StackFrameUtils.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-063",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/SystemVCallingConvention.cpp",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-064",
-    "title": "[TODO] Review src/JIT/X86_64/Utils/SystemVCallingConvention.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-file-review-065",
-    "title": "[TODO] Review src/JIT/X86_64/X86_64Compiler.h",
-    "status": "icebox",
-    "description": "Review status inferred from absence of a user FIX comment; prior visits are unknown.",
-    "source": "ai-issues/050-jit-source-review.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-review-smoke-failures",
-    "title": "[TODO] Investigate exception, float and generic smoke failures",
-    "status": "icebox",
-    "description": "Native execution returned 42 in all three cases; JIT lazy compilation failed. No pre-refactor baseline was captured for these programs.",
-    "source": "ai-issues/051-jit-refactor-smoke-failures.md",
-    "dependsOn": []
-  },
-  {
-    "id": "native-executable-outer-typeinfo-crash",
-    "title": "[TODO] Investigate native executable outer TypeInfo crash",
-    "status": "icebox",
-    "description": "A native executable dispatching into a precompiled generic implementation segfaulted; equivalent native library-mode and JIT callers returned 42. Cause unconfirmed.",
-    "source": "ai-issues/037-jit-review-037.md",
-    "dependsOn": []
-  },
-  {
-    "id": "runtime-abi-knowledge",
-    "title": "Document runtime and ABI topics",
-    "status": "done",
-    "description": "Documented all 18 requested topics with source-backed examples and diagrams; checked the dashboard stack illustration and note links.",
-    "source": "ai-insights/abi-stack-frames.md",
-    "dependsOn": []
-  },
-  {
-    "id": "static-dashboard",
-    "title": "Publish the dashboard as a static site on GitHub Pages",
-    "status": "done",
-    "description": "Replaced the local Node server with a build step (dashboard/build.js) that mirrors exposed content into dashboard/dist/ and a Pages workflow; verified board, dependency graph, documents, SVG illustration and class graph under a Pages-like sub-path. Also renamed ai-insides/ to ai-insights/.",
-    "source": "arch/knowledge-dashboard.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-unused-interference-graph",
-    "title": "[REFACTOR] Avoid unused interference-graph construction",
-    "status": "icebox",
-    "description": "The stack allocator checks the graph's size but does not use its edges; decide whether to defer graph construction or introduce an allocator that consumes it.",
-    "source": "ai-issues/060-jit-unused-interference-graph.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-repeated-safepoint-analysis",
-    "title": "[REFACTOR] Reuse safepoint initialization analysis",
-    "status": "icebox",
-    "description": "CFG, reachability and must-initialization are recomputed for each safepoint; preserve exceptional-edge and temporary-root semantics when sharing them.",
-    "source": "ai-issues/061-jit-repeated-safepoint-analysis.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-call-lowering-duplication",
-    "title": "[REFACTOR] Share common call-lowering steps",
-    "status": "icebox",
-    "description": "Direct and virtual calls duplicate argument and result handling but differ in scratch layouts and error semantics; add targeted coverage before sharing.",
-    "source": "ai-issues/062-jit-call-lowering-duplication.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-safepoint-provenance-refactor",
-    "title": "[REFACTOR] Separate safepoint reference provenance",
-    "status": "icebox",
-    "description": "The recursive classifier combines managed, stack-local and derived root handling; add GC and exceptional-edge coverage before separating it.",
-    "source": "ai-issues/063-jit-safepoint-provenance-refactor.md",
-    "dependsOn": []
-  },
-  {
-    "id": "jit-trivial-cleanup",
-    "title": "[REFACTOR] Remove JIT dead code and simplify compilation",
-    "status": "done",
-    "description": "Removed unused graph and location code, shared incoming argument offsets, extracted focused compilation and safepoint helpers, and verified JIT regressions plus local finalizers and imported globals.",
-    "source": "arch/jit-liveness.md",
+    "description": "External package discovery unresolved; do not fake runtime metadata.",
+    "source": "ai-issues/052-jit-defined-typeinfo.md",
     "dependsOn": []
   }
 ]

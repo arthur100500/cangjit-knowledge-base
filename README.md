@@ -1,11 +1,23 @@
 # cangjit-knowledge-base
-Knowledge files and issues reguaring cangjit project
 
-- [CangJIT coding rules](ai-docs/coding-rules.md)
-- [Review tasks and current status](tasks.json) (`[REFACTOR]` and `[TODO]`)
-- [Metadata layout](ai-docs/jit-metadata-layout.md)
-- [Function frame and metadata publication](ai-docs/jit-function-frame-and-metadata.md)
-- [Lazy function stub](ai-docs/jit-function-stub.md)
-- [Review questions](ai-docs/jit-review-questions.md)
+Knowledge base for the cangjit JIT project. `cangjit` (code) and this repo are
+sibling checkouts; root rules live in cangjit's `AGENTS.md` (change pipeline
+gates, build via `./build.sh`, examples verification).
 
-Issue files preserve the original review snapshot; task status is tracked in `tasks.json`.
+## Layout
+
+- `ai-docs/` — scouting notes and reference docs (function frames, metadata
+  layout, lazy stub, native stack/exceptions, GC, state assertions). Kept intact.
+- `ai-insights/` — durable ABI insights: stack frames, lazy compilation,
+  stack-frame diagram, object allocation.
+- `ai-issues/` — open issues and proposals; `NNN-name.md`, one file per issue.
+- `arch/` — accepted architecture decisions.
+- `tasks.json` — task board (dashboard input; dashboard source in `dashboard/`).
+
+## Knowledge compaction (2026-11-24)
+
+Removed `unfinished/` (session dumps and patches — all patches are already in
+cangjit git history: `bcf2836c`…`676c60dea3`), per-file review issues 002–049
+(duplicates of the 050 checklist) and 15 abi-insights notes superseded by the
+kept ones. Task board compacted from 137 to 19 tasks (done history + open
+backlog only). Issues 050–063 and `ai-docs/` are unchanged.

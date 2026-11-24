@@ -6,7 +6,7 @@ A deeply recursive JIT function crashed with SIGSEGV while the runtime was tryin
 
 ## Evidence (2026-11-21)
 
-The exact sources are in `unfinished/repros/stack-overflow/`: `package.cj` defines the native local-finalizer/GC package, `main.cj` is the failing 3,000-deep JIT case, and `native-check.cj` checks the same computation and finalizer count while returning 42 on success. Native `native-check.cj` exited 42. A 100-deep version of `main.cj` returned 101 in both modes. The 3,000-deep JIT run exited 139 and logged:
+The exact sources are in `native/repros/stack-overflow/`: `package.cj` defines the native local-finalizer/GC package, `main.cj` is the failing 3,000-deep JIT case, and `native-check.cj` checks the same computation and finalizer count while returning 42 on success. Native `native-check.cj` exited 42. A 100-deep version of `main.cj` returned 101 in both modes. The 3,000-deep JIT run exited 139 and logged:
 
 ```text
 SIGSEGV in MRT_UpdateUwContext
@@ -38,7 +38,7 @@ JIT prologues and lazy resolver stubs currently have no Cangjie stack-limit chec
 From the cangjit repository, with the development shell and an SDK able to load the JIT runtime:
 
 ```sh
-repro=../cangjit-knowledge-base/unfinished/repros/stack-overflow
+repro=../cangjit-knowledge-base/native/repros/stack-overflow
 pkg=$(mktemp -d)
 output/bin/cjc --experimental --enable-local-mode -Woff all "$repro/package.cj" \
   --output-type=dylib -o "$pkg/libcangjie-std-jit_final.so"
