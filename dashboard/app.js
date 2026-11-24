@@ -119,6 +119,12 @@ function renderArchitectureGraph() {
     status.hidden = false;
     return;
   }
+  if (typeof cytoscapeElk !== 'function') {
+    status.textContent = 'ELK layout unavailable. Install dashboard dependencies to display the graph; the class list remains available below.';
+    status.hidden = false;
+    return;
+  }
+  cytoscapeElk(cytoscape); // registers the 'elk' layout
 
   const selectedId = document.getElementById('architecture-class').value;
   const relationType = document.getElementById('architecture-relation').value;
@@ -147,7 +153,24 @@ function renderArchitectureGraph() {
       { selector: 'node.focused', style: { 'background-color': '#b8ded9', 'border-color': '#125f59', 'border-width': 3, 'font-weight': 'bold' } },
       { selector: 'edge', style: { label: 'data(label)', width: 1.5, 'line-color': '#879c9b', 'target-arrow-color': '#879c9b', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'font-size': 12, 'text-background-color': '#fff', 'text-background-opacity': 0.9, 'text-background-padding': '3px' } },
     ],
-    layout: { name: 'cose', animate: false, fit: true, padding: 40, nodeDimensionsIncludeLabels: true },
+    layout: {
+      name: 'elk',
+      nodeDimensionsIncludeLabels: true,
+      fit: true,
+      padding: 40,
+      animate: false,
+      useElkEdgeGeometry: true,
+      elkEdgeRadius: 12,
+      elk: {
+        algorithm: 'layered',
+        'elk.direction': 'RIGHT',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '90',
+        'elk.spacing.nodeNode': '35',
+        'elk.edgeRouting': 'ORTHOGONAL',
+        'elk.layered.considerModelOrder.strategy': 'PREFER_NODES',
+        'elk.layered.compaction.postCompaction.strategy': 'EDGE_LENGTH',
+      },
+    },
     minZoom: 0.001,
     maxZoom: 3,
   });

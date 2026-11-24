@@ -6,6 +6,7 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "cytoscape": "3.33.1"
+    "cytoscape": "3.33.1",
+    "cytoscape-elk": "2.4.0"
   }
 }

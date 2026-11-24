@@ -20,7 +20,6 @@ const documentRoots = {
   'ai-issues': 'issues',
   arch: 'decisions',
 };
-const sessionPath = 'unfinished/SESSION-STATE.md';
 // Each mirrored path segment must be URL-safe on any static host.
 const safeSegment = /^[A-Za-z0-9._-]+$/;
 
@@ -59,7 +58,6 @@ function documentLocation(name) {
   if (typeof name !== 'string' || name.includes('\\') || name.includes('\0')) return null;
   const parts = name.split('/');
   if (parts.some(part => !part || part === '.' || part === '..')) return null;
-  if (name === sessionPath) return { directory: path.join(root, 'unfinished'), relative: 'SESSION-STATE.md', category: 'knowledge' };
   if (!Object.hasOwn(documentRoots, parts[0]) || parts.length < 2 || !name.endsWith('.md')) return null;
   return { directory: path.join(root, parts[0]), relative: parts.slice(1).join('/'), category: documentRoots[parts[0]] };
 }
@@ -106,7 +104,6 @@ async function listDocuments() {
       if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR' && error.code !== 'ELOOP') throw error;
     }
   }
-  await add(sessionPath, 'knowledge');
   return documents.sort((a, b) => a.path.localeCompare(b.path));
 }
 
@@ -201,6 +198,8 @@ async function main() {
     ['style.css', 'style.css'],
     ['app.js', 'app.js'],
     ['cytoscape.min.js', path.join('node_modules', 'cytoscape', 'dist', 'cytoscape.min.js')],
+    ['elk.min.js', path.join('node_modules', 'elkjs', 'lib', 'elk.bundled.js')],
+    ['cytoscape-elk.min.js', path.join('node_modules', 'cytoscape-elk', 'dist', 'cytoscape-elk.js')],
   ]) {
     await writeDocument(name, await fs.readFile(path.join(__dirname, file), 'utf8'));
   }
