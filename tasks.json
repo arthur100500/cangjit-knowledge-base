@@ -1,5 +1,13 @@
 [
   {
+    "id": "jit-state-assertions",
+    "title": "Assert internal JIT state invariants",
+    "status": "icebox",
+    "description": "Scouting identified internal state checks and silent skips; awaiting Gate 2 approval before changing JIT code. Preserve recoverable failures and account for disabled release assertions.",
+    "source": "ai-docs/jit-state-assertion-scout.md",
+    "dependsOn": []
+  },
+  {
     "id": "package-typeinfo",
     "title": "Support JIT-defined package TypeInfo",
     "status": "icebox",
