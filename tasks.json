@@ -1,5 +1,13 @@
 [
   {
+    "id": "jit-debug-logger",
+    "title": "Centralize JIT debug logging",
+    "status": "done",
+    "description": "Logger owns debug configuration and assembly output; semantic logging APIs replace consumer-side mode checks. Debug build and JIT function-call/resolver-stub smoke passed.",
+    "source": "arch/jit-debug-configuration.md",
+    "dependsOn": []
+  },
+  {
     "id": "finalizer-shared-liveness",
     "title": "Reuse JIT liveness for local finalizer frontiers",
     "status": "done",
