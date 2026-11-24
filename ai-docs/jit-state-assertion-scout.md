@@ -18,3 +18,9 @@ Scouted 2026-11-24, limited to `cangjit/src/JIT`. `CJC_ASSERT` in `include/cangj
 An absent registered lazy call site is valid for indirect stub calls. Constants and non-local operands need not have value numbers. Unreachable finalizer allocations and escaped objects can legitimately have no frontier. Unsupported CHIR, ABI classes, runtime symbol lookup, allocation, frame limits, metadata representability and materialization failure remain reported failures. Recursive lazy resolution is explicitly detected. Missing `user.main` and null package globals require contract evidence before treating them as assertions.
 
 No build or generated-code execution was performed during scouting; changes require Gate 2 approval first.
+
+## Implementation verification (2026-11-24)
+
+The approved assertions were implemented in `src/JIT` for liveness, float dispatch, lazy calls, ABI placement, safepoint analysis and finalizer frontiers. Existing defensive release paths remain where assertions alone cannot enforce safety. Invalid successful materialization now records a failed state instead of leaving the function compiling.
+
+`./build.sh` exited 0. With `LD_LIBRARY_PATH="$PWD/build/build/lib:$LD_LIBRARY_PATH"`, `timeout 30s build/build/bin/cjc --jit examples/NN_*.cj` was run separately for each numbered example 01 through 10: every invocation exited 0 and reported `JIT: main returned 0`. A temporary Float64 call, addition and comparison smoke also exited 0 and returned 0. The runtime emitted a std-core/runtime version compatibility warning on these runs. `hello.cj` was not run.
