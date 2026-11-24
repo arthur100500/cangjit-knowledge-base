@@ -106,8 +106,7 @@ movable-heap roots. Stack slots containing them are tracked as stack addresses.
 Native/JIT comparisons exercised straight-line, branch, loop, stack and
 interface aliases, failed allocation, constructor and method exceptions,
 multiple-finalizer order, and heavy GC. Escaped-address and less common edge
-cases remain unverified. Deep recursion exposed the separate stack-overflow
-crash in `ai-issues/001-jit-stack-overflow.md`.
+cases remain unverified.
 
 ## Checked arithmetic exceptions
 
