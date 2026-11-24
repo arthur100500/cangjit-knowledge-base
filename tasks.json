@@ -1,5 +1,13 @@
 [
   {
+    "id": "finalizer-shared-liveness",
+    "title": "Reuse JIT liveness for local finalizer frontiers",
+    "status": "done",
+    "description": "Shared liveness replaces the per-allocation solver. Debug build, numbered examples 01–10, a CHIR debug-only edge check, and generated-code finalizer timing on both branch paths passed.",
+    "source": "arch/jit-liveness.md",
+    "dependsOn": []
+  },
+  {
     "id": "jit-state-assertions",
     "title": "Assert internal JIT state invariants",
     "status": "done",
