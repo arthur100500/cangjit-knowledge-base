@@ -2,8 +2,8 @@
   {
     "id": "jit-state-assertions",
     "title": "Assert internal JIT state invariants",
-    "status": "in-progress",
-    "description": "Gate 2 approved for proven internal invariants; implementation must preserve recoverable failures and account for disabled release assertions.",
+    "status": "testing",
+    "description": "Implemented approved JIT invariant assertions; debug build and numbered generated-code examples are pending verification.",
     "source": "ai-docs/jit-state-assertion-scout.md",
     "dependsOn": []
   },
