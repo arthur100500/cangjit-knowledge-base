@@ -174,5 +174,13 @@
     "description": "Renamed IntegerUtil to TypeUtils, added TypeWidth and IsFloating, migrated JIT width/float classification callers including stub validation, and preserved CompileBlock::ScalarWidth's local-reference restriction. Debug build passed; numbered examples 01-10 and Float32/Float64 function smoke test each exited 0.",
     "source": "arch/jit-type-utils.md",
     "dependsOn": []
+  },
+  {
+    "id": "jit-typed-memory-move",
+    "title": "Generalize typed JIT memory moves",
+    "status": "done",
+    "description": "Generalized typed MemoryUtils::Move across GP/SIMD/local-stack/incoming-stack locations and routed SaveParameter through it. Debug build passed; examples 01-10 exited 0. Smoke test passed Int8 normalization, Float32/Float64 register parameters, and seventh integer/ninth floating incoming-stack parameters.",
+    "source": "arch/jit-typed-memory-move.md",
+    "dependsOn": ["jit-integer-util"]
   }
 ]
