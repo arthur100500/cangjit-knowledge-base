@@ -158,5 +158,13 @@
     "description": "External package discovery unresolved; do not fake runtime metadata.",
     "source": "ai-issues/052-jit-defined-typeinfo.md",
     "dependsOn": []
+  },
+  {
+    "id": "jit-integer-util",
+    "title": "Extract JIT integer utility",
+    "status": "done",
+    "description": "Moved integer width lookup and register normalization into IntegerUtil; migrated JIT callers. Debug build passed and numbered examples 01-10 each exited 0.",
+    "source": "arch/jit-integer-util.md",
+    "dependsOn": []
   }
 ]
