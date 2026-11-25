@@ -160,6 +160,14 @@
     "dependsOn": []
   },
   {
+    "id": "jit-cooperative-safepoints",
+    "title": "Add cooperative JIT safepoint polling",
+    "status": "icebox",
+    "description": "Investigate and integrate runtime-compatible poll checks and exact-PC maps in the AsmJit JIT; consider the surrounding refactor.",
+    "source": "op-issues/001-jit-cooperative-safepoints.md",
+    "dependsOn": []
+  },
+  {
     "id": "jit-integer-util",
     "title": "Extract JIT type utilities",
     "status": "done",
