@@ -1,0 +1,9 @@
+This note identifies repeated JIT type predicates that may belong in `TypeUtils`.
+
+## Findings
+
+- Floating checks for `TYPE_FLOAT32 || TYPE_FLOAT64` recur in `CompileApply.cpp` (`IsScalarFloat`), `CompileNumericCast.cpp` (source/target classification), `CompileBinaryExpression.cpp`, `CompileInvoke.cpp`, `CompileUnaryExpression.cpp`, `CompileFunction.cpp`, and `CompileFunctionStub.cpp`. `CompileBlock.cpp` and `MemoryUtils.cpp` also branch on float kinds, but often need the specific kind to select a width or instruction. `SystemVCallingConvention.cpp` classifies ABI registers using switch cases. `TypeUtils::IsFloating(const CHIR::Type&)` can replace the repeated Boolean checks; kind-specific branches should remain where the exact float kind matters.
+- Pointer-like checks (`IsRef() || IsCPointer() || IsCString()`) recur in `CompileFunction.cpp` (return and parameter handling) and `SafepointLiveness.cpp`; `CompileInvoke.cpp` and `CompileApply.cpp` have closely related acceptance checks. `TypeUtils::IsPointerLike(const CHIR::Type&)` is a candidate, but callers still own policy distinctions such as managed references, object returns and safepoint liveness.
+- Width classification is split among integer-only `IntegerWidth`, Boolean special cases, pointer width 64, and Float32/Float64 branches. `TypeUtils::TypeWidth` can centralize representation widths while callers retain operation-specific supported-type checks. `CompileBlock.cpp::ScalarWidth` has a special local-class-reference policy that must not be broadened unintentionally.
+
+Sources: `src/JIT/X86_64/Compilers/Expression/{CompileApply,CompileBinaryExpression,CompileInvoke,CompileNumericCast,CompileUnaryExpression}.cpp`; `src/JIT/X86_64/Compilers/Function/{CompileBlock,CompileFunction,CompileFunctionStub}.cpp`; `src/JIT/X86_64/Utils/{MemoryUtils,SystemVCallingConvention}.cpp`; `src/JIT/X86_64/RegisterAllocation/SafepointLiveness.cpp`.

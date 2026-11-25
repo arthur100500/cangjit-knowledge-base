@@ -161,10 +161,10 @@
   },
   {
     "id": "jit-integer-util",
-    "title": "Extract JIT integer utility",
+    "title": "Extract JIT type utilities",
     "status": "done",
-    "description": "Moved integer width lookup and register normalization into IntegerUtil; migrated JIT callers. Debug build passed and numbered examples 01-10 each exited 0.",
-    "source": "arch/jit-integer-util.md",
+    "description": "Renamed IntegerUtil to TypeUtils, added TypeWidth and IsFloating, migrated JIT width/float classification callers including stub validation, and preserved CompileBlock::ScalarWidth's local-reference restriction. Debug build passed; numbered examples 01-10 and Float32/Float64 function smoke test each exited 0.",
+    "source": "arch/jit-type-utils.md",
     "dependsOn": []
   }
 ]
