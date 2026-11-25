@@ -5,6 +5,10 @@
 Bitmaps include both normal and exceptional successors. Safepoints still perform separate must-initialization, reference-provenance and GC-root classification; ordinary liveness alone cannot identify safe roots. CHIR blocks and expressions must remain alive and unchanged from analysis until the result is discarded after function compilation. A compact row per expression plus block exit uses more temporary memory than recomputing rows on demand, in exchange for reducing repeated work during JIT compilation.
 
 Local finalizer frontiers project the shared block-entry bitmaps onto each allocation's representative values, including tracked stack-slot addresses and reloads. The union over successor entries determines whether any representative is live out. The frontier still discovers aliases and escapes, checks definite registration on reachable paths (including `TryAllocate` failure), and chooses cleanup sites. An independent backward solver per allocation was rejected because it repeats the same use/def equations.
+Local finalizer frontier refactor: preserve `ComputeLocalFinalizerFrontier`'s result/API and split its internal work into representative discovery, CFG registration/reachability analysis, and cleanup-site collection helpers. Continue projecting shared block-entry liveness onto representative values; retain stack-slot alias tracking, conservative escape handling, `TryAllocate` registration semantics, and expression/edge cleanup selection. This avoids a second liveness solver while making each phase independently understandable.
+
+Refactor verification: `./build.sh` exited 0. Numbered JIT examples 01–10 were run independently; each exited 0. These examples do not exercise local-region finalizer frontiers, so finalizer-specific generated-code behavior remains unverified.
+
 
 JIT `DEBUGEXPR` emits no code and does not read or define a runtime value. Both shared liveness transfer paths therefore ignore it while retaining its bitmap row. This keeps debug-only uses from postponing finalization or extending register-allocation and GC liveness.
 

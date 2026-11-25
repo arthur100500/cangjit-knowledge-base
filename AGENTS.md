@@ -127,6 +127,12 @@ in a batch at session end:
 * Write into this repository as work happens, not at the end of a session —
   a crashed session must not lose acquired knowledge.
 * Do not put secrets, tokens, or large binary artifacts here.
+
+
+### Verification scope
+
+* Run only the narrowest check that exercises the change. Do not repeat broad or unrelated checks when prior state is documented as passing; verify only when this change could invalidate that state.
+
 * Commit messages follow the cangjit convention: concise subject line.
 
 ## Change pipeline for cangjit
