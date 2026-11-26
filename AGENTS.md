@@ -114,12 +114,10 @@ in a batch at session end:
 
 ## Sync rules
 
-* This repository is agent-maintained: agents are permitted to commit to and
-  push it directly (no human approval needed per commit). Push after each
-  meaningful batch of knowledge, not once at session end.
-* The user works from multiple PCs: at session start and before every push,
-  run `git pull --rebase` (or `git fetch` + rebase) and resolve any conflicts
-  by keeping both sides' knowledge — never drop another machine's notes.
+* Do not commit or push changes unless the user explicitly asks. By default,
+  leave completed changes staged for the user to review.
+* Before a user-authorized push, run `git pull --rebase` (or `git fetch` +
+  rebase) and resolve conflicts by keeping both sides' knowledge.
 * Do not force-push. If the history diverged unexpectedly, merge instead.
 
 ## General rules
@@ -134,6 +132,37 @@ in a batch at session end:
 * Run only the narrowest check that exercises the change. Do not repeat broad or unrelated checks when prior state is documented as passing; verify only when this change could invalidate that state.
 
 * Commit messages follow the cangjit convention: concise subject line.
+
+## Cangjit code style
+
+* Any assembly sequence longer than two lines must live in a helper method with a one-line comment describing its purpose, or be expressed as equivalent C++ code.
+* Avoid magic values. Give used registers and other non-obvious constants adequately named global constants.
+* Keep functions at or below 120 lines; exceptions require justification.
+* Search for existing logic before implementing it. Reuse or generalize existing code rather than duplicating behavior.
+* Apply single responsibility throughout: each method should do one job. If its body needs several distinct steps to explain, consider splitting it.
+* When a coherent object representation is needed to express part of the logic, define a dedicated type for it rather than encoding it as an untyped collection or tuple.
+
+* **Strong single responsibility — exclusive ownership, not helper extraction.**
+  For every refactor, identify each complete responsibility and its owner before
+  coding. Reuse an existing owner or create a cohesive one; move the full policy
+  there, including decisions, invariants, validation, state changes, emission,
+  and failure handling. Callers may pass inputs, sequence calls, and handle
+  results, but must not partially implement or work around another component's
+  rules.
+  - Do not stop at extracting isolated helpers while the responsibility remains
+    split across callers. Migrate every caller and remove the old path.
+  - Keep utility components limited to one coherent domain; never collect
+    unrelated helpers in a generic utility.
+  - Infer and propose the necessary ownership boundaries and types yourself;
+    do not wait for the user to name them. Follow the gates below before coding.
+  - Example: `FunctionMetadata` owns metadata representation and format
+    encoding; `BinaryUtils` owns primitive byte encoding; `CompileFunction`
+    only orchestrates. Likewise, hidden-TypeInfo ordering, ABI location
+    handling, and frame-slot copying should belong to one cohesive owner, not
+    be implemented in `CompileFunction`.
+* Avoid checks for impossible or corrupted states, such as unrealistic overflow or null checks. Use `CJC_ASSERT` only when an invariant genuinely needs asserting.
+* Avoid documentation unless it explains non-trivial behavior or a high-level algorithm. Keep necessary comments brief; use examples and lists where they clarify.
+
 
 ## Change pipeline for cangjit
 
@@ -208,6 +237,11 @@ Only after Gate 2 is accepted:
    from, if any, plus the exit code of every example run.
 
 ### Scope rules
+
+* The user's code ownership is limited to `src/JIT/`. Inspect and modify code
+  only within that directory; do not expand work into other compiler subsystems.
+  Explicitly requested instruction-file updates, including this `AGENTS.md`,
+  are permitted outside that directory.
 
 * Trivial changes (typo fixes, comment edits, mechanical renames confined to
   one file) may skip the gates — state that you are treating the change as

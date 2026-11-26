@@ -1,5 +1,29 @@
 [
   {
+    "id": "jit-binary-utils",
+    "title": "Extract binary encoding primitives for JIT metadata",
+    "status": "done",
+    "description": "Added endian/ULEB128 helpers and LSB-first BitWriter; replaced FunctionMetadata's encoding lambdas. Debug build passed; numbered examples 01-10 exited 0 under cjc --jit; tasks.json validated.",
+    "source": "arch/jit-function-metadata.md",
+    "dependsOn": ["jit-function-metadata"]
+  },
+  {
+    "id": "jit-function-metadata",
+    "title": "Represent JIT function metadata as a serializable object",
+    "status": "done",
+    "description": "JitMetadataBuilder renamed to FunctionMetadata with a Serialize method in src/JIT/Runtime; format unchanged and decodable by runtime StackMap readers. Debug build passed; numbered examples 01-10 exited 0 under cjc --jit.",
+    "source": "arch/jit-function-metadata.md",
+    "dependsOn": []
+  },
+  {
+    "id": "named-tuple-records",
+    "title": "Replace domain tuples with named-field structs",
+    "status": "in-progress",
+    "description": "Inventoried 43 proposed named-field records across compiler/JIT/mangling/Unicode. Gate 1 contracts presented in ai-docs/named-tuple-record-contracts.md; waiting for explicit acceptance before Gate 2. No compiler code changed.",
+    "source": "ai-issues/064-jit-named-tuple-records.md",
+    "dependsOn": []
+  },
+  {
     "id": "jit-debug-logger",
     "title": "Centralize JIT debug logging",
     "status": "done",
